@@ -12,3 +12,5 @@ e2e/**/*.js
 e2e/**/*.js.map
 .DS_STORE
 **/.DS_STORE
+*.iml
+.idea/
