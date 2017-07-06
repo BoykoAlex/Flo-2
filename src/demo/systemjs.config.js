@@ -39,7 +39,7 @@
       rxjs: {
         defaultExtension: 'js'
       },
-      'quickstart-lib': {
+      'spring-flo': {
         main: 'index.js',
         defaultExtension: 'js',
         meta: {
