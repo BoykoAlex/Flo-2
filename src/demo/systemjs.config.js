@@ -25,6 +25,11 @@
 
       // other libraries
       'rxjs': 'npm:rxjs',
+      'jointjs': 'npm:jointjs',
+      'jquery': 'npm:jquery',
+      'backbone': 'npm:backbone',
+      'lodash': 'npm:lodash',
+      'underscore': 'npm:lodash'
     },
     // packages tells the System loader how to load when no filename and/or no extension
     packages: {
@@ -38,6 +43,18 @@
       },
       rxjs: {
         defaultExtension: 'js'
+      },
+      jointjs: {
+        main: './dist/joint.js'
+      },
+      jquery: {
+        main: './dist/jquery.js',
+      },
+      backbone: {
+        main: './backbone.js',
+      },
+      lodash: {
+        main: './index.js',
       },
       'spring-flo': {
         main: 'index.js',

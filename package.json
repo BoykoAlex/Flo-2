@@ -35,6 +35,10 @@
     "lint": "tslint ./src/**/*.ts -t verbose",
     "release": "standard-version"
   },
+  "dependencies": {
+    "jointjs": "1.0.3",
+    "lodash": "3.10.1"
+  },
   "peerDependencies": {
     "@angular/core": ">=4.0.0 <5.0.0 || >=4.0.0-beta <5.0.0"
   },
