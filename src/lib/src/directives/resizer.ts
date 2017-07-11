@@ -1,4 +1,4 @@
-import { Directive, Input, Output, EventEmitter, Inject, ElementRef } from '@angular/core';
+import { Directive, Input, Output, EventEmitter, Inject, ElementRef, OnInit } from '@angular/core';
 import { DOCUMENT } from '@angular/platform-browser'
 
 const $ = require('jquery');
@@ -9,7 +9,7 @@ const $ = require('jquery');
     '(mousedown)': 'startDrag()'
   }
 })
-export class ResizerDirective {
+export class ResizerDirective implements OnInit {
 
   private vertical : boolean = true;
 
@@ -18,6 +18,8 @@ export class ResizerDirective {
   private second : string;
 
   private _size : number;
+
+  private _splitSize : number;
 
   private mouseMoveHandler = (e : any) => this.mousemove(e);
   private mouseUpHanlder = (e : any) => this.mouseup();
@@ -57,6 +59,8 @@ export class ResizerDirective {
         height: splitSize + 'px'
       });
     }
+
+    this._splitSize = splitSize;
 
     // Update the local field
     this.sizeChange.emit(splitSize);
@@ -123,6 +127,11 @@ export class ResizerDirective {
   private mouseup() {
     $(this.document).unbind('mousemove', this.mouseMoveHandler);
     $(this.document).unbind('mouseup', this.mouseUpHanlder);
+  }
+
+  ngOnInit() {
+    // Need to set left and right elements width and fire events on init when DOM is built
+    this.splitSize = this._splitSize;
   }
 
 }

@@ -73,11 +73,14 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
   @Input()
   set paletteSize(size : number) {
     console.log('Palette Size : ' + size);
+    this._paletteSize = size;
     this.metamodel.load().then(metamodel => this.buildPalette(metamodel));
   }
 
   @Output()
   onPaletteEntryDrop = new EventEmitter<PaletteDnDEvent>();
+
+  private _paletteSize : number;
 
   private _filterText : string = '';
 
@@ -168,7 +171,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
       console.error('No Metamodel service specified for palette!');
     }
 
-    // this.paletteSize = this.paletteSize || $(this.element.nativeElement.parentNode).width();
+    this._paletteSize = this._paletteSize || $(this.element.nativeElement.parentNode).width();
 
   }
 
@@ -218,7 +221,8 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
     let paletteNodes : Array<dia.Element> = [];
     let groupAdded : Set<string> = new Set<string>();
 
-    let parentWidth : number = $(this.element.nativeElement.parentNode).width();
+    let parentWidth : number = this._paletteSize;
+    console.log(`Parent Width : ${parentWidth}`);
 
     // The field closedGroups tells us which should not be shown
     // Work out the list of active groups/nodes based on the filter text
