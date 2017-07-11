@@ -36,6 +36,7 @@
     "release": "standard-version"
   },
   "dependencies": {
+    "@angular/forms": "^4.2.6",
     "jointjs": "1.0.3",
     "lodash": "3.10.1"
   },

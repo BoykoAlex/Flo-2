@@ -72,7 +72,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
   @Input()
   paletteSize : number;
 
-  filterText : string = '';
+  private _filterText : string = '';
 
   private paletteGraph : dia.Graph;
 
@@ -97,11 +97,16 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
   constructor(private element: ElementRef) {
     this.paletteGraph = new joint.dia.Graph();
     this.paletteGraph.set('type', joint.shapes.flo.PALETTE_TYPE);
-    this.filterText = '';
+    this._filterText = '';
 
     this.closedGroups = new Set<string>();
 
     this._metamodelListener = new Palette.MetamodelListener(this);
+  }
+
+  printFilterText() {
+    console.log('Filter Text = ' + this.filterText);
+    setTimeout(() => this.printFilterText(), 2000);
   }
 
   ngOnInit() {
@@ -157,7 +162,9 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
       console.error('No Metamodel service specified for palette!');
     }
 
-    this.paletteSize = this.paletteSize || $(this.element.nativeElement.parentNode).width()
+    this.paletteSize = this.paletteSize || $(this.element.nativeElement.parentNode).width();
+
+    this.printFilterText();
 
   }
 
@@ -171,6 +178,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(changes : SimpleChanges) {
+    console.log('Changed!!!');
     if (changes.hasOwnProperty('paletteSize') || changes.hasOwnProperty('filterText')) {
       this.metamodel.load().then(metamodel => this.buildPalette(metamodel));
     }
@@ -312,6 +320,15 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
     });
     this.palette.setDimensions(parentWidth, ypos);
     console.info('buildPalette took '+(new Date().getTime()-startTime)+'ms');
+  }
+
+  set filterText(text : string) {
+    this._filterText = text;
+    this.metamodel.load().then(metamodel => this.buildPalette(metamodel));
+  }
+
+  get filterText() : string {
+    return this._filterText;
   }
 
   // private getPaletteView(view : any) {
