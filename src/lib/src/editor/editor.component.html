@@ -1,0 +1,32 @@
+<div id="flow-view" class="flow-view" style="position:relative; height:100%">
+  <div id="canvas" class="canvas" style="position:relative; display: block; width: 100%; height: 100%;">
+    <div id="palette-container" class="palette-container" ng-if="!flo.noPalette" style="overflow:hidden;">
+      <flo-palette [metamodel]="metamodel" [paletteSize]="paletteSize"></flo-palette>
+    </div>
+
+    <div id="sidebar-resizer"></div>
+    <!--<div id="sidebar-resizer" ng-if="!flo.noPalette"-->
+    <!--resizer="vertical"-->
+    <!--resizer-width="6"-->
+    <!--resizer-left="#palette-container"-->
+    <!--resizer-right="#paper-container">-->
+    <!--</div>-->
+
+    <div id="paper-container">
+      <div id="paper" class="paper" tabindex="0" style="overflow: hidden; position: absolute; display: block; height:100%; width:100%; overflow:auto;"></div>
+
+    <!--
+    <span class="canvas-controls-container" ng-if="canvasControls">
+                                <table ng-if="canvasControls.zoom" class="canvas-control zoom-canvas-control"><tbody><tr>
+                                    <td><input class="zoom-canvas-input canvas-control zoom-canvas-control" type="text" data-inline="true" ng-model="flo.zoomPercent" ng-model-options="{ getterSetter: true, updateOn: \'blur change\' }" size="3"></input>
+                                    <label class="canvas-control zoom-canvas-label">%</label></td>
+                                    <td><input type="range" data-inline="true" ng-model="flo.zoomPercent" ng-model-options="{ getterSetter: true }" step="{{flo.getZoomStep()}}" max="{{flo.getMaxZoom()}}" min="{{flo.getMinZoom()}}" data-type="range" name="range" class="canvas-control zoom-canvas-control"></input></td>
+                                </tr></tbody></table>
+                            </span>
+    <div id="properties" class="properties" style="position:absolute; bottom:0; width:100%; overflow:auto;"></div>
+    -->
+    </div>
+  </div>
+  <div id="hook"></div>
+  <div id="dialogs"></div>
+</div>
