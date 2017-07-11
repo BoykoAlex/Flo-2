@@ -56,7 +56,7 @@ export class Editor implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(changes : SimpleChanges) {
-
+    console.log('Something changes');
   }
 
 }

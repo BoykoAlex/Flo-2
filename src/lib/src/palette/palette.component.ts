@@ -71,7 +71,10 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
   paletteEntryPadding : dia.Size = {width:12, height:12};
 
   @Input()
-  paletteSize : number;
+  set paletteSize(size : number) {
+    console.log('Palette Size : ' + size);
+    this.metamodel.load().then(metamodel => this.buildPalette(metamodel));
+  }
 
   @Output()
   onPaletteEntryDrop = new EventEmitter<PaletteDnDEvent>();
@@ -82,6 +85,8 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
 
   private palette : dia.Paper;
 
+  private mouseMoveHanlder = (e : any) => this.handleDrag(e);
+  private mouseUpHanlder = (e : any) => this.handleMouseUp(e);
 
   private _metamodelListener : Flo.MetamodelListener;
 
@@ -150,7 +155,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
         // TODO [palette] move 'metadata' field to the right place (not inside attrs I think)
       });
 
-    $(this.document).on('mouseup', (e : any) => this.handleMouseUp(e));
+    $(this.document).on('mouseup', this.mouseUpHanlder);
 
     if (this.metamodel) {
       this.metamodel.load().then(data => {
@@ -163,7 +168,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
       console.error('No Metamodel service specified for palette!');
     }
 
-    this.paletteSize = this.paletteSize || $(this.element.nativeElement.parentNode).width();
+    // this.paletteSize = this.paletteSize || $(this.element.nativeElement.parentNode).width();
 
   }
 
@@ -171,7 +176,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
       if (this.metamodel && this.metamodel.unsubscribe) {
         this.metamodel.unsubscribe(this._metamodelListener);
       }
-      $(this.document).off('mouseup', (e : any) => this.handleMouseUp(e));
+      $(this.document).off('mouseup', this.mouseUpHanlder);
   }
 
   ngOnChanges(changes : SimpleChanges) {
@@ -337,7 +342,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
         // TODO move metadata to the right place (not inside attrs I think)
         self.clickedElement = this.model;
         if (self.clickedElement.attr('metadata')) {
-          $(self.document).on('mousemove', (e : any) => self.handleDrag(e));
+          $(self.document).on('mousemove', self.mouseMoveHanlder);
         }
       },
       pointermove: function(/*evt, x, y*/) {
@@ -428,7 +433,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
   }
 
   private handleMouseUp(event : any) {
-    $(this.document).off('mousemove', (e : any) => this.handleDrag(e));
+    $(this.document).off('mousemove', this.mouseMoveHanlder);
   }
 
   private trigger(event : PaletteDnDEvent) {

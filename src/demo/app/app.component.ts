@@ -116,6 +116,8 @@ export class AppComponent {
 
   metamodel : Flo.Metamodel;
 
+  paletteSize = 170;
+
   constructor(libService: LibService) {
     this.meaning = libService.getMeaning();
     this.metamodel = new Metamodel(metamodelData);
