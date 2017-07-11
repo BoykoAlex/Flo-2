@@ -1,7 +1,8 @@
-import {Component, ElementRef, Input, OnInit, OnDestroy, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, ElementRef, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges, Inject} from '@angular/core';
 import { dia } from 'jointjs';
 import { Flo } from './../shared/flo.common';
 import { Shapes } from './../shared/shapes';
+import { DOCUMENT } from '@angular/platform-browser'
 
 const joint = require('jointjs');
 const $ = require('jquery');
@@ -32,7 +33,7 @@ joint.shapes.flo.PaletteGroupHeader = joint.shapes.basic.Generic.extend({
 
 export interface PaletteDnDEvent {
   type : string;
-  element : dia.CellView;
+  view : dia.CellView;
   event : any;
 }
 
@@ -72,6 +73,9 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
   @Input()
   paletteSize : number;
 
+  @Output()
+  onPaletteEntryDrop = new EventEmitter<PaletteDnDEvent>();
+
   private _filterText : string = '';
 
   private paletteGraph : dia.Graph;
@@ -94,7 +98,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
 
   private viewBeingDragged : dia.CellView;
 
-  constructor(private element: ElementRef) {
+  constructor(private element: ElementRef, @Inject(DOCUMENT) private document : any) {
     this.paletteGraph = new joint.dia.Graph();
     this.paletteGraph.set('type', joint.shapes.flo.PALETTE_TYPE);
     this._filterText = '';
@@ -102,11 +106,6 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
     this.closedGroups = new Set<string>();
 
     this._metamodelListener = new Palette.MetamodelListener(this);
-  }
-
-  printFilterText() {
-    console.log('Filter Text = ' + this.filterText);
-    setTimeout(() => this.printFilterText(), 2000);
   }
 
   ngOnInit() {
@@ -117,39 +116,41 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
       model: this.paletteGraph,
       height: $(this.element.nativeElement.parentNode).height(),
       width: $(this.element.nativeElement.parentNode).width(),
-      elementView: this.renderer && this.renderer.getNodeView ? this.renderer.getNodeView() : joint.dia.ElementView
+      elementView: this.getPaletteView(this.renderer && this.renderer.getNodeView ? this.renderer.getNodeView() : joint.dia.ElementView)
     });
 
-    // palette.on('cell:pointerup',
-    //   function(cellview, evt) {
-    //     console.debug('pointerup');
-    //     if (this.viewBeingDragged) {
-    //       trigger('drop',{'dragged':viewBeingDragged,'evt':evt});
-    //       viewBeingDragged = null;
-    //     }
-    //     clickedElement = null;
-    //     $('#palette-floater').remove();
-    //   });
-    //
-    // // Toggle the header open/closed on a click
-    // palette.on('cell:pointerclick',
-    //   function(cellview/*,evt*/) {
-    //     // TODO [design][palette] should the user need to click on the arrow rather than anywhere on the header?
-    //     // Click position within the element would be: evt.offsetX, evt.offsetY
-    //     var element = cellview.model;
-    //     if (cellview.model.attributes.header) {
-    //       // Toggle the header open/closed
-    //       if (element.get('isOpen')) {
-    //         rotateClosed(element);
-    //       } else {
-    //         rotateOpen(element);
-    //       }
-    //     }
-    //     // TODO [palette] ensure other mouse handling events do nothing for headers
-    //     // TODO [palette] move 'metadata' field to the right place (not inside attrs I think)
-    //   });
+    this.palette.on('cell:pointerup', (cellview : dia.CellView, evt : any) => {
+        console.debug('pointerup');
+        if (this.viewBeingDragged) {
+          this.trigger({
+            type: 'drop',
+            view: this.viewBeingDragged,
+            event : evt
+          });
+          this.viewBeingDragged = null;
+        }
+        this.clickedElement = null;
+        $('#palette-floater').remove();
+    });
 
-    // $(document).on('mouseup', handleMouseUp);
+    // Toggle the header open/closed on a click
+    this.palette.on('cell:pointerclick', (cellview : dia.CellView, event : any) => {
+        // TODO [design][palette] should the user need to click on the arrow rather than anywhere on the header?
+        // Click position within the element would be: evt.offsetX, evt.offsetY
+        let element : dia.Cell = cellview.model;
+        if (cellview.model.attributes.header) {
+          // Toggle the header open/closed
+          if (element.get('isOpen')) {
+            this.rotateClosed(element);
+          } else {
+            this.rotateOpen(element);
+          }
+        }
+        // TODO [palette] ensure other mouse handling events do nothing for headers
+        // TODO [palette] move 'metadata' field to the right place (not inside attrs I think)
+      });
+
+    $(document).on('mouseup', (e : any) => this.handleMouseUp(e));
 
     if (this.metamodel) {
       this.metamodel.load().then(data => {
@@ -164,24 +165,20 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
 
     this.paletteSize = this.paletteSize || $(this.element.nativeElement.parentNode).width();
 
-    this.printFilterText();
-
   }
 
   ngOnDestroy() {
       if (this.metamodel && this.metamodel.unsubscribe) {
         this.metamodel.unsubscribe(this._metamodelListener);
       }
-
-      //TODO: deal with palette DnD
-      // $(document).off('mouseup', handleMouseUp);
+      $(document).off('mouseup', (e : any) => this.handleMouseUp(e));
   }
 
   ngOnChanges(changes : SimpleChanges) {
     console.log('Changed!!!');
-    if (changes.hasOwnProperty('paletteSize') || changes.hasOwnProperty('filterText')) {
-      this.metamodel.load().then(metamodel => this.buildPalette(metamodel));
-    }
+    // if (changes.hasOwnProperty('paletteSize') || changes.hasOwnProperty('filterText')) {
+    //   this.metamodel.load().then(metamodel => this.buildPalette(metamodel));
+    // }
   }
 
   private createPaletteGroup(title : string, isOpen : boolean) : dia.Element {
@@ -331,20 +328,21 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
     return this._filterText;
   }
 
-  // private getPaletteView(view : any) {
-  //   return view.extend({
-  //     pointerdown: function(/*evt, x, y*/) {
-  //       // Remove the tooltip
-  //       $('.node-tooltip').remove();
-  //       // TODO move metadata to the right place (not inside attrs I think)
-  //       this.clickedElement = this.model;
-  //       if (this.clickedElement.attr('metadata')) {
-  //         $(document).on('mousemove', handleDrag);
-  //       }
-  //     },
-  //     pointermove: function(/*evt, x, y*/) {
-  //       // Nothing to prevent move within the palette canvas
-  //     },
+  private getPaletteView(view : any) : dia.Element {
+    let self : Palette = this;
+    return view.extend({
+      pointerdown: function(/*evt, x, y*/) {
+        // Remove the tooltip
+        // $('.node-tooltip').remove();
+        // TODO move metadata to the right place (not inside attrs I think)
+        self.clickedElement = this.model;
+        if (self.clickedElement.attr('metadata')) {
+          $(self.document).on('mousemove', (e : any) => self.handleDrag(e));
+        }
+      },
+      pointermove: function(/*evt, x, y*/) {
+        // Nothing to prevent move within the palette canvas
+      },
       // events: {
       //   // Tooltips on the palette elements
       //   'mouseenter': function(evt) {
@@ -426,62 +424,109 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
       //   $('.node-tooltip').css({ top: mousey, left: mousex });
       // }
 
-  //   });
-  // }
+    });
+  }
 
-  // function trigger(triggerEvent,paramsObject) {
-  //   if ($scope.paletteObservers) {
-  //     $scope.paletteObservers.fireEvent(triggerEvent, paramsObject);
-  //   }
-  // }
-  //
-  // function handleDrag(event) {
-  //   // TODO offsetX/Y not on firefox
-  //   //$log.debug("tracking move: x="+event.pageX+",y="+event.pageY);
-  //   if (clickedElement && clickedElement.attr('metadata')) {
-  //     if (!viewBeingDragged) {
-  //       var dataOfClickedElement = clickedElement.attr('metadata');
-  //       // custom div if not already built.
-  //       $('<div>', {
-  //         id: 'palette-floater'
-  //       }).appendTo($('body'));
-  //       var floatergraph = new joint.dia.Graph();
-  //       floatergraph.attributes.type = joint.shapes.flo.FEEDBACK_TYPE;
-  //       var floaterpaper = new joint.dia.Paper({
-  //         el: $('#palette-floater'),
-  //         elementView: renderService && angular.isFunction(renderService.getNodeView) ? renderService.getNodeView() : joint.dia.ElementView,
-  //         gridSize:10,
-  //         model: floatergraph,
-  //         height: 400,
-  //         width: 200,
-  //         validateMagnet: function() {
-  //           return false;
-  //         },
-  //         validateConnection: function() {
-  //           return false;
-  //         }
-  //       });
-  //       // TODO float thing needs to be bigger otherwise icon label is missing
-  //       // Initiative drag and drop - create draggable element
-  //       var floaternode = shapesFactory.createNode({
-  //         'renderService': renderService,
-  //         'paper': floaterpaper,
-  //         'graph': floatergraph,
-  //         'metadata': dataOfClickedElement
-  //       });
-  //       var box = floaterpaper.findViewByModel(floaternode).getBBox();
-  //       var size = floaternode.get('size');
-  //       // Account for node real size including ports
-  //       floaternode.translate(box.width - size.width, box.height - size.height);
-  //       viewBeingDragged = floaterpaper.findViewByModel(floaternode);
-  //       $('#palette-floater').offset({left:event.pageX+5,top:event.pageY+5});
-  // //					trigger('dragStarted',{'dragged':viewBeingDragged,'x':x,'y':y});
-  //     } else {
-  //       $('#palette-floater').offset({left:event.pageX+5,top:event.pageY+5});
-  //       trigger('drag',{'dragged':viewBeingDragged,'evt':event});
-  //
-  //     }
-  //   }
-  // }
+  private handleMouseUp(event : any) {
+    $(document).off('mousemove', (e : any) => this.handleDrag(e));
+  }
+
+  private trigger(event : PaletteDnDEvent) {
+    console.log('EVENT: type=' + event.type + ' element=' + event.view.model.attr('metadata/name') + ' x=' + event.event.pageX + ' y=' + event.event.pageY);
+    this.onPaletteEntryDrop.emit(event);
+  }
+
+  private handleDrag(event : any) {
+    // TODO offsetX/Y not on firefox
+    // console.debug("tracking move: x="+event.pageX+",y="+event.pageY);
+    // console.log('Element = ' + (this.clickedElement ? this.clickedElement.attr('metadata/name') : 'null'));
+    if (this.clickedElement && this.clickedElement.attr('metadata')) {
+      if (!this.viewBeingDragged) {
+
+        let dataOfClickedElement : Flo.ElementMetadata = this.clickedElement.attr('metadata');
+        // custom div if not already built.
+        $('<div>', {
+          id: 'palette-floater'
+        }).appendTo($('body'));
+
+        let floatergraph : dia.Graph = new joint.dia.Graph();
+        floatergraph.attributes.type = joint.shapes.flo.FEEDBACK_TYPE;
+
+        let floaterpaper : dia.Paper = new joint.dia.Paper({
+          el: $('#palette-floater'),
+          elementView: this.renderer && this.renderer.getNodeView ? this.renderer.getNodeView() : joint.dia.ElementView,
+          gridSize: 10,
+          model: floatergraph,
+          height: 400,
+          width: 200,
+          validateMagnet: () => false,
+          validateConnection: () => false
+        });
+
+        // TODO float thing needs to be bigger otherwise icon label is missing
+        // Initiative drag and drop - create draggable element
+        let floaternode : dia.Element = Shapes.Factory.createNode({
+          'renderService': this.renderer,
+          'paper': floaterpaper,
+          'graph': floatergraph,
+          'metadata': dataOfClickedElement
+        });
+
+        let box : dia.BBox = floaterpaper.findViewByModel(floaternode).getBBox();
+        let size : dia.Size = floaternode.get('size');
+        // Account for node real size including ports
+        floaternode.translate(box.width - size.width, box.height - size.height);
+        this.viewBeingDragged = floaterpaper.findViewByModel(floaternode);
+        $('#palette-floater').offset({left:event.pageX+5,top:event.pageY+5});
+      } else {
+        $('#palette-floater').offset({left:event.pageX+5,top:event.pageY+5});
+        this.trigger({
+          type: 'drag',
+          view: this.viewBeingDragged,
+          event: event
+        });
+      }
+    }
+  }
+
+  /*
+   * Modify the rotation of the arrow in the header from horizontal(closed) to vertical(open)
+   */
+  private rotateOpen(element : dia.Cell) {
+    setTimeout(() => this.doRotateOpen(element, 90));
+  }
+
+  private doRotateOpen(element : dia.Cell, angle : number) {
+    angle -= 10;
+    element.attr({'path':{'transform':'rotate(-'+angle+',15,13)'}});
+    if (angle <= 0) {
+      element.set('isOpen',true);
+      this.closedGroups.delete(element.get('header'));
+      this.metamodel.load().then(metadata => this.buildPalette(metadata));
+    } else {
+      setTimeout(() => this.doRotateOpen(element, angle),10);
+    }
+  }
+
+  private doRotateClose(element : dia.Cell, angle : number) {
+    angle +=10;
+    element.attr({'path':{'transform':'rotate(-'+angle+',15,13)'}});
+    if (angle >= 90) {
+      element.set('isOpen',false);
+      this.closedGroups.add(element.get('header'));
+      this.metamodel.load().then(metadata => this.buildPalette(metadata));
+    } else {
+      setTimeout(() => this.doRotateClose(element, angle),10);
+    }
+  }
+
+  // TODO better name for this function as this does the animation *and* updates the palette
+
+  /*
+   * Modify the rotation of the arrow in the header from vertical(open) to horizontal(closed)
+   */
+  private rotateClosed(element : dia.Cell) {
+    setTimeout(() => this.doRotateClose(element, 0));
+  }
 
 }
