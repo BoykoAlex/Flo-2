@@ -150,7 +150,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
         // TODO [palette] move 'metadata' field to the right place (not inside attrs I think)
       });
 
-    $(document).on('mouseup', (e : any) => this.handleMouseUp(e));
+    $(this.document).on('mouseup', (e : any) => this.handleMouseUp(e));
 
     if (this.metamodel) {
       this.metamodel.load().then(data => {
@@ -171,7 +171,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
       if (this.metamodel && this.metamodel.unsubscribe) {
         this.metamodel.unsubscribe(this._metamodelListener);
       }
-      $(document).off('mouseup', (e : any) => this.handleMouseUp(e));
+      $(this.document).off('mouseup', (e : any) => this.handleMouseUp(e));
   }
 
   ngOnChanges(changes : SimpleChanges) {
@@ -428,11 +428,11 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
   }
 
   private handleMouseUp(event : any) {
-    $(document).off('mousemove', (e : any) => this.handleDrag(e));
+    $(this.document).off('mousemove', (e : any) => this.handleDrag(e));
   }
 
   private trigger(event : PaletteDnDEvent) {
-    console.log('EVENT: type=' + event.type + ' element=' + event.view.model.attr('metadata/name') + ' x=' + event.event.pageX + ' y=' + event.event.pageY);
+    console.debug('EVENT: type=' + event.type + ' element=' + event.view.model.attr('metadata/name') + ' x=' + event.event.pageX + ' y=' + event.event.pageY);
     this.onPaletteEntryDrop.emit(event);
   }
 
