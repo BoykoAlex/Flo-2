@@ -1,6 +1,7 @@
 import { Component, Input, ElementRef, OnInit, OnDestroy, OnChanges, SimpleChanges} from '@angular/core';
 import { dia } from 'jointjs';
 import { Flo } from './../shared/flo.common';
+import { PaletteDnDEvent } from '../palette/palette.component';
 const joint = require('jointjs');
 const $ = require('jquery');
 
@@ -57,6 +58,10 @@ export class Editor implements OnInit, OnDestroy, OnChanges {
 
   ngOnChanges(changes : SimpleChanges) {
     console.log('Something changes');
+  }
+
+  handlePaletteEntryDnDEvent(event : PaletteDnDEvent) {
+    console.log(`Drop Event type=${event.type}`);
   }
 
 }

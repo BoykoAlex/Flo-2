@@ -75,11 +75,11 @@ class Metamodel implements Flo.Metamodel {
 
   constructor(private rawData : Array<RawMetadata>) {}
 
-  textToGraph(flo : Flo.EditorDescriptor, definition: Flo.Definition) {
+  textToGraph(flo : Flo.ViewerDescriptor, definition: Flo.Definition) {
     console.log('Text -> Graph');
   }
 
-  graphToText(flo : Flo.EditorDescriptor, definition: Flo.Definition) {
+  graphToText(flo : Flo.ViewerDescriptor, definition: Flo.Definition) {
     console.log('Graph -> Text');
   }
 

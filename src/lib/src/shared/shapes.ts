@@ -1,7 +1,7 @@
 import { dia } from '@types/jointjs';
 import { Flo } from './flo.common';
 import ElementCreationParams = Shapes.ElementCreationParams;
-import EditorDescriptor = Flo.EditorDescriptor;
+import EditorDescriptor = Flo.ViewerDescriptor;
 const joint = require('jointjs');
 const _ = require('underscore');
 
@@ -198,9 +198,7 @@ joint.shapes.flo.ErrorDecoration = joint.shapes.basic.Generic.extend({
 
 export namespace Shapes {
 
-  export interface CreationParams {
-    metadata? : Flo.ElementMetadata;
-    props? : Map<string, any>;
+  export interface CreationParams extends Flo.CreationParams {
     renderService? : any; // TODO: switch for the RenderService interface type later on
     paper? : dia.Paper;
     graph? : dia.Graph;
@@ -267,7 +265,7 @@ export namespace Shapes {
         graph.addCell(node);
       }
       if (renderService && _.isFunction(renderService.initializeNewNode)) {
-        let descriptor : Flo.EditorDescriptor = {
+        let descriptor : Flo.ViewerDescriptor = {
           paper: paper,
           graph: graph
         };
@@ -302,7 +300,7 @@ export namespace Shapes {
         graph.addCell(link);
       }
       if (renderService && _.isFunction(renderService.initializeNewLink)) {
-        let descriptor : Flo.EditorDescriptor = {
+        let descriptor : Flo.ViewerDescriptor = {
           paper: paper,
           graph: graph
         };
@@ -347,7 +345,7 @@ export namespace Shapes {
       }
       parent.embed(decoration);
       if (renderService && _.isFunction(renderService.initializeNewDecoration)) {
-        let descriptor : Flo.EditorDescriptor = {
+        let descriptor : Flo.ViewerDescriptor = {
           paper: paper,
           graph: graph
         };
@@ -391,7 +389,7 @@ export namespace Shapes {
       }
       parent.embed(handle);
       if (renderService && _.isFunction(renderService.initializeNewHandle)) {
-        let descriptor : Flo.EditorDescriptor = {
+        let descriptor : Flo.ViewerDescriptor = {
           paper: paper,
           graph: graph
         };
