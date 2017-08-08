@@ -1,4 +1,6 @@
 import {Component, ElementRef, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges, Inject} from '@angular/core';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import 'rxjs/add/operator/debounceTime';
 import { dia } from 'jointjs';
 import { Flo } from './../shared/flo.common';
 import { Shapes } from './../shared/shapes';
@@ -6,6 +8,8 @@ import { DOCUMENT } from '@angular/platform-browser'
 
 const joint = require('jointjs');
 const $ = require('jquery');
+
+const DEBOUNCE_TIME : number = 300;
 
 joint.shapes.flo.PaletteGroupHeader = joint.shapes.basic.Generic.extend({
   // The path is the open/close arrow, defaults to vertical (open)
@@ -74,7 +78,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
   set paletteSize(size : number) {
     console.log('Palette Size : ' + size);
     this._paletteSize = size;
-    this.metamodel.load().then(metamodel => this.buildPalette(metamodel));
+    this.rebuildPalette();
   }
 
   @Output()
@@ -87,6 +91,8 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
   private paletteGraph : dia.Graph;
 
   private palette : dia.Paper;
+
+  private filterTextModel = new BehaviorSubject(this.filterText);
 
   private mouseMoveHanlder = (e : any) => this.handleDrag(e);
   private mouseUpHanlder = (e : any) => this.handleMouseUp(e);
@@ -114,6 +120,10 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
     this.closedGroups = new Set<string>();
 
     this._metamodelListener = new Palette.MetamodelListener(this);
+
+    this.filterTextModel
+      .debounceTime(DEBOUNCE_TIME)
+      .subscribe((value) => this.rebuildPalette());
   }
 
   ngOnInit() {
@@ -328,9 +338,15 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
     console.info('buildPalette took '+(new Date().getTime()-startTime)+'ms');
   }
 
+  rebuildPalette() {
+    if (this.metamodel) {
+      this.metamodel.load().then(metamodel => this.buildPalette(metamodel));
+    }
+  }
+
   set filterText(text : string) {
     this._filterText = text;
-    this.metamodel.load().then(metamodel => this.buildPalette(metamodel));
+    this.filterTextModel.next(text);
   }
 
   get filterText() : string {
@@ -511,7 +527,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
     if (angle <= 0) {
       element.set('isOpen',true);
       this.closedGroups.delete(element.get('header'));
-      this.metamodel.load().then(metadata => this.buildPalette(metadata));
+      this.rebuildPalette();
     } else {
       setTimeout(() => this.doRotateOpen(element, angle),10);
     }
@@ -523,7 +539,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
     if (angle >= 90) {
       element.set('isOpen',false);
       this.closedGroups.add(element.get('header'));
-      this.metamodel.load().then(metadata => this.buildPalette(metadata));
+      this.rebuildPalette();
     } else {
       setTimeout(() => this.doRotateClose(element, angle),10);
     }

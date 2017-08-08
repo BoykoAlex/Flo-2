@@ -1,31 +1,28 @@
-import { Directive, Input, Output, EventEmitter, Inject, ElementRef, OnInit } from '@angular/core';
-import { DOCUMENT } from '@angular/platform-browser'
-
+import {Directive, Input, Output, EventEmitter, Inject, ElementRef, OnInit} from '@angular/core';
+import {DOCUMENT} from '@angular/platform-browser'
+import {Observable}  from 'rxjs/Observable';
+import 'rxjs/add/operator/sampleTime';
+import 'rxjs/add/observable/fromEvent';
 const $ = require('jquery');
 
 @Directive({
   selector: '[resizer]',
-  host: {
-    '(mousedown)': 'startDrag()'
-  }
+  host: {'(mousedown)': 'startDrag()'}
 })
 export class ResizerDirective implements OnInit {
-
-  private vertical : boolean = true;
-
-  private first : string;
-
-  private second : string;
-
-  private _size : number;
-
-  private _splitSize : number;
-
-  private mouseMoveHandler = (e : any) => this.mousemove(e);
-  private mouseUpHanlder = (e : any) => this.mouseup();
-
+  private dragInProgress: boolean = false;
+  private vertical: boolean = true;
+  private first: string;
+  private second: string;
+  private _size: number;
+  private _splitSize: number;
+  private mouseMoveHandler = (e: any) => {
+    if (this.dragInProgress) {
+      this.mousemove(e);
+    }
+  };
   @Input()
-  maxSplitSize : number;
+  maxSplitSize: number;
 
   @Input()
   set splitSize(splitSize : number) {
@@ -96,42 +93,42 @@ export class ResizerDirective implements OnInit {
     this.second = second;
   }
 
-
   @Input()
   set resizerBottom(second : string) {
     this.second = second;
   }
 
-  constructor(private element : ElementRef, @Inject(DOCUMENT) private document : any) {
+  constructor(private element: ElementRef, @Inject(DOCUMENT) private document: any) {
     console.log('Building Resizer!!!');
+    Observable.fromEvent($(document), 'mousemove')
+      .sampleTime(300)
+      .subscribe(this.mouseMoveHandler);
+    Observable.fromEvent($(document), 'mouseup')
+      .subscribe(e => {
+        if (this.dragInProgress) {
+          this.mousemove(e);
+          this.dragInProgress = false;
+        }
+      });
   }
 
   private startDrag() {
-    console.log('RESIZER: CLICK!!! Size=' + this._size);
-    $(document).on('mousemove', this.mouseMoveHandler);
-    $(document).on('mouseup', this.mouseUpHanlder);
+    this.dragInProgress = true;
   }
 
-  private mousemove(event : any) {
-    let size : number;
-    if (this.vertical) {
-      // Handle vertical resizer. Calculate new size relative to palette container DOM node
+  private mousemove(event: any) {
+    let size: number;
+    if (this.vertical) {       // Handle vertical resizer. Calculate new size relative to palette container DOM node 
       size = event.pageX - $(this.first).offset().left;
     } else {
-      // Handle horizontal resizer Calculate new size relative to palette container DOM node
+      // Handle horizontal resizer Calculate new size relative to palette container DOM node 
       size = window.innerHeight - event.pageY - $(this.second).offset().top;
     }
     this.splitSize = size;
   }
 
-  private mouseup() {
-    $(this.document).unbind('mousemove', this.mouseMoveHandler);
-    $(this.document).unbind('mouseup', this.mouseUpHanlder);
-  }
-
   ngOnInit() {
-    // Need to set left and right elements width and fire events on init when DOM is built
+    // Need to set left and right elements width and fire events on init when DOM is built 
     this.splitSize = this._splitSize;
   }
-
-}
+} 
