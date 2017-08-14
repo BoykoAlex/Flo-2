@@ -38,7 +38,7 @@ joint.shapes.flo.PaletteGroupHeader = joint.shapes.basic.Generic.extend({
 export interface PaletteDnDEvent {
   type : string;
   view : dia.CellView;
-  event : any;
+  event : MouseEvent;
 }
 
 @Component({
@@ -212,7 +212,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
 
   private createPaletteEntry(title : string, metadata : Flo.ElementMetadata) {
     return Shapes.Factory.createNode({
-      renderService: this.renderer,
+      renderer: this.renderer,
       paper: this.palette,
       metadata: metadata
     });
@@ -491,7 +491,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
         // TODO float thing needs to be bigger otherwise icon label is missing
         // Initiative drag and drop - create draggable element
         let floaternode : dia.Element = Shapes.Factory.createNode({
-          'renderService': this.renderer,
+          "renderer": this.renderer,
           'paper': floaterpaper,
           'graph': floatergraph,
           'metadata': dataOfClickedElement

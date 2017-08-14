@@ -27,10 +27,12 @@ joint.shapes.flo.PALETTE_TYPE = 'palette';
 joint.shapes.flo.FEEDBACK_TYPE = 'feedback';
 
 const HANDLE_ICON_MAP : Map<string, string>= new Map<string, string>();
-HANDLE_ICON_MAP.set('remove', 'icons/delete.svg');
+const REMOVE = 'remove';
+HANDLE_ICON_MAP.set(REMOVE, 'icons/delete.svg');
 
 const DECORATION_ICON_MAP : Map<string, string>= new Map<string, string>();
-DECORATION_ICON_MAP.set('error', 'icons/error.svg');
+const ERROR = 'error';
+DECORATION_ICON_MAP.set(ERROR, 'icons/error.svg');
 
 joint.util.filter.redscale = (args : Shapes.FilterOptions) => {
 
@@ -181,6 +183,43 @@ joint.shapes.flo.Link = joint.dia.Link.extend({
   }, joint.dia.Link.prototype.defaults)
 });
 
+joint.shapes.flo.LinkView = joint.dia.LinkView.extend({
+
+  options: joint.util.deepSupplement({
+  }, joint.dia.LinkView.prototype.options),
+
+  _beforeArrowheadMove: function() {
+    if (this.model.get('source').id) {
+      this._oldSource = this.model.get('source');
+    }
+    if (this.model.get('target').id) {
+      this._oldTarget = this.model.get('target');
+    }
+    joint.dia.LinkView.prototype._beforeArrowheadMove.apply(this, arguments);
+  },
+
+  _afterArrowheadMove: function() {
+    joint.dia.LinkView.prototype._afterArrowheadMove.apply(this, arguments);
+    if (!this.model.get('source').id) {
+      if (this._oldSource) {
+        this.model.set('source', this._oldSource);
+      } else {
+        this.model.remove();
+      }
+    }
+    if (!this.model.get('target').id) {
+      if (this._oldTarget) {
+        this.model.set('target', this._oldTarget);
+      } else {
+        this.model.remove();
+      }
+    }
+    delete this._oldSource;
+    delete this._oldTarget;
+  }
+
+});
+
 joint.shapes.flo.ErrorDecoration = joint.shapes.basic.Generic.extend({
 
   markup: '<g class="rotatable"><g class="scalable"><image/></g></g>',
@@ -198,8 +237,12 @@ joint.shapes.flo.ErrorDecoration = joint.shapes.basic.Generic.extend({
 
 export namespace Shapes {
 
+  export const REMOVE_HANDLE_TYPE = REMOVE;
+
+  export const ERROR_DECORATION_KIND = ERROR;
+
   export interface CreationParams extends Flo.CreationParams {
-    renderService? : any; // TODO: switch for the RenderService interface type later on
+    renderer? : Flo.Renderer;
     paper? : dia.Paper;
     graph? : dia.Graph;
   }
@@ -239,7 +282,7 @@ export namespace Shapes {
      * Create a JointJS node that embeds extra metadata (properties).
      */
     static createNode(params : ElementCreationParams) : dia.Element {
-      let renderService : any = params.renderService;
+      let renderer : any = params.renderer;
       let paper : dia.Paper = params.paper;
       let metadata : Flo.ElementMetadata = params.metadata;
       let position : dia.Point = params.position;
@@ -251,8 +294,8 @@ export namespace Shapes {
         position = {x: 0, y: 0};
       }
 
-      if (renderService && _.isFunction(renderService.createNode)) {
-        node = renderService.createNode(metadata, props);
+      if (renderer && _.isFunction(renderer.createNode)) {
+        node = renderer.createNode(metadata, props);
       } else {
         node = new joint.shapes.flo.Node();
         node.attr('.label/text', metadata.name);
@@ -264,18 +307,18 @@ export namespace Shapes {
       if (graph) {
         graph.addCell(node);
       }
-      if (renderService && _.isFunction(renderService.initializeNewNode)) {
+      if (renderer && _.isFunction(renderer.initializeNewNode)) {
         let descriptor : Flo.ViewerDescriptor = {
           paper: paper,
           graph: graph
         };
-        renderService.initializeNewNode(node, descriptor);
+        renderer.initializeNewNode(node, descriptor);
       }
       return node;
     }
 
     static createLink(params : LinkCreationParams) : dia.Link {
-      let renderService : any = params.renderService;
+      let renderer : any = params.renderer;
       let paper : dia.Paper = params.paper;
       let metadata : Flo.ElementMetadata = params.metadata;
       let source : string = params.source;
@@ -284,8 +327,8 @@ export namespace Shapes {
       let graph : dia.Graph= params.graph || (params.paper ? params.paper.model : undefined);
 
       let link : dia.Link;
-      if (renderService && _.isFunction(renderService.createLink)) {
-        link = renderService.createLink(source, target, metadata, props);
+      if (renderer && _.isFunction(renderer.createLink)) {
+        link = renderer.createLink(source, target, metadata, props);
       } else {
         link = new joint.shapes.flo.Link();
       }
@@ -299,12 +342,12 @@ export namespace Shapes {
       if (graph) {
         graph.addCell(link);
       }
-      if (renderService && _.isFunction(renderService.initializeNewLink)) {
+      if (renderer && _.isFunction(renderer.initializeNewLink)) {
         let descriptor : Flo.ViewerDescriptor = {
           paper: paper,
           graph: graph
         };
-        renderService.initializeNewLink(link, descriptor);
+        renderer.initializeNewLink(link, descriptor);
       }
       // prevent creation of link breaks
       link.attr('.marker-vertices/display', 'none');
@@ -312,7 +355,7 @@ export namespace Shapes {
     }
 
     static createDecoration(params : DecorationCreationParams) : dia.Element {
-      let renderService : any = params.renderService;
+      let renderer : any = params.renderer;
       let paper : dia.Paper = params.paper;
       let parent : dia.Cell = params.parent;
       let kind : string = params.kind;
@@ -324,8 +367,8 @@ export namespace Shapes {
         location = {x: 0, y: 0};
       }
       let decoration : dia.Element;
-      if (renderService && _.isFunction(renderService.createDecoration)) {
-        decoration = renderService.createDecoration(kind, parent);
+      if (renderer && _.isFunction(renderer.createDecoration)) {
+        decoration = renderer.createDecoration(kind, parent);
       } else {
         decoration = new joint.shapes.flo.ErrorDecoration({
           attrs: {
@@ -344,18 +387,18 @@ export namespace Shapes {
         graph.addCell(decoration);
       }
       parent.embed(decoration);
-      if (renderService && _.isFunction(renderService.initializeNewDecoration)) {
+      if (renderer && _.isFunction(renderer.initializeNewDecoration)) {
         let descriptor : Flo.ViewerDescriptor = {
           paper: paper,
           graph: graph
         };
-        renderService.initializeNewDecoration(decoration, descriptor);
+        renderer.initializeNewDecoration(decoration, descriptor);
       }
       return decoration;
     }
 
     static createHandle(params : HandleCreationParams) : dia.Element {
-      let renderService : any = params.renderService;
+      let renderer : any = params.renderer;
       let paper : dia.Paper = params.paper;
       let parent : dia.Cell = params.parent;
       let kind : string = params.kind;
@@ -366,8 +409,8 @@ export namespace Shapes {
       if (!location) {
         location = {x: 0, y: 0};
       }
-      if (renderService && _.isFunction(renderService.createHandle)) {
-        handle = renderService.createHandle(kind, parent);
+      if (renderer && _.isFunction(renderer.createHandle)) {
+        handle = renderer.createHandle(kind, parent);
       } else {
         handle = new joint.shapes.flo.ErrorDecoration({
           size: HANDLE_SIZE,
@@ -388,12 +431,12 @@ export namespace Shapes {
         graph.addCell(handle);
       }
       parent.embed(handle);
-      if (renderService && _.isFunction(renderService.initializeNewHandle)) {
+      if (renderer && _.isFunction(renderer.initializeNewHandle)) {
         let descriptor : Flo.ViewerDescriptor = {
           paper: paper,
           graph: graph
         };
-        renderService.initializeNewHandle(handle, descriptor);
+        renderer.initializeNewHandle(handle, descriptor);
       }
       return handle;
     }

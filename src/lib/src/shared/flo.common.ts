@@ -48,12 +48,12 @@ export namespace Flo {
   export interface Definition {
     text : string;
     name? : string; //TODO: is this still required?
-    [propName : string] : any; //TODO: is anything lese needed?
+    [propName : string] : any; //TODO: is anything else needed?
   }
 
   export interface Metamodel {
-    textToGraph(flo : ViewerDescriptor, definition: Definition) : void;
-    graphToText(flo : ViewerDescriptor, definition: Definition) : void;
+    textToGraph(flo : EditorContext, definition: Definition) : void;
+    graphToText(flo : EditorContext, definition: Definition) : void;
     load() : Promise<Map<string, Map<string, ElementMetadata>>>;
     groups() : Array<string>;
 
@@ -95,7 +95,7 @@ export namespace Flo {
 
   export interface Renderer {
     createNode?(params : CreationParams) : dia.Element;
-    createLink?(params : LinkCreationParams) : dia.Link;
+    newLink?() : dia.Link;
     createHandle?(params : HandleCreationParams) : dia.Element;
     createDecoration?(params : DecorationCreationParams) : dia.Element;
     initializeNewNode?(node : dia.Element, viewerDescriptor : ViewerDescriptor) : void;
@@ -104,7 +104,7 @@ export namespace Flo {
     initializeNewDecoration?(decoration : dia.Element, viewerDescriptor : ViewerDescriptor) : void;
     getNodeView?() : dia.ElementView;
     getLinkView?() : dia.LinkView;
-    layout?(paper : dia.Paper) : void;
+    layout?(paper : dia.Paper) : Promise<void>;
     handleLinkEvent?(paper : dia.Paper, event : string, link : dia.Link) : void;
     isSemanticProperty?(propertyPath : string, element : dia.Cell) : boolean;
     refreshVisuals?(cell : dia.Cell, propertyPath : string, paper : dia.Paper) : void;
@@ -115,26 +115,28 @@ export namespace Flo {
     zoomPercent : number;
     gridSize : number;
     readOnlyCanvas : boolean;
+    selection : dia.CellView;
+    graphToTextSync : boolean;
     scheduleGraphUpdate() : void;
     updateGraph() : void;
     updateText() : void;
-    performLayout() : void;
+    performLayout() : Promise<void>;
     clearGraph() : void;
     getGraph() : dia.Graph;
     getPaper() : dia.Paper;
-    enableSyncing(enable : boolean) : void;
-    getSelection() : dia.CellView;
     getMinZoom() : number;
     getMaxZoom() : number;
     getZoomStep() : number;
     fitToPage() : void;
-    createNode(params : ElementCreationParams) : dia.Element;
-    createLink(params : LinkCreationParams) : dia.Link;
+    createNode(metadata : Flo.ElementMetadata, props : Map<string, any>, position : dia.Point) : dia.Element;
+    createLink(source : string, target : string, metadata : Flo.ElementMetadata, props : Map<string, any>) : dia.Link;
+    deleteSelectedNode() : void;
+    postValidation() : void;
   }
 
   export interface LinkEndDescriptor {
     view : dia.ElementView;
-    selector? : dia.CSSSelector;
+    selector? : string;
   }
 
   export interface DnDDescriptor {
@@ -149,23 +151,25 @@ export namespace Flo {
   }
 
   export interface Marker {
-    owner : dia.Cell;
     severity : Severity;
     message : string;
+    range? : any;
   }
 
   export interface Editor {
     interactive? : ((cellView: dia.CellView, event: string) => boolean) | boolean | { vertexAdd?: boolean, vertexMove?: boolean, vertexRemove?: boolean, arrowheadMove?: boolean };
     allowLinkVertexEdit? : boolean;
+    highlighting? : any;
     createHandles?(context : EditorContext, createHandle : (owner : dia.CellView, kind : string, action : () => void, location : dia.Point) => void, owner : dia.CellView) : void;
-    validatePort?(paper : dia.Paper, view : dia.ElementView, magnet : SVGElement) : boolean;
+    validatePort?(context : EditorContext, view : dia.ElementView, magnet : SVGElement) : boolean;
     validateLink?(context : EditorContext, cellViewS : dia.ElementView, portS : SVGElement, cellViewT : dia.ElementView, portT : SVGElement, isSource : boolean, linkView : dia.LinkView) : boolean;
-    calculateDragDescriptor?(context : EditorContext, draggedView : dia.ElementView, targetUnderMouse : dia.Cell, coordinate : dia.Point, sourceComponent : string) : DnDDescriptor;
+    calculateDragDescriptor?(context : EditorContext, draggedView : dia.CellView, targetUnderMouse : dia.CellView, coordinate : dia.Point, sourceComponent : string) : DnDDescriptor;
     handleNodeDropping?(context : EditorContext, dragDescriptor : DnDDescriptor) : void;
     showDragFeedback?(context : EditorContext, dragDescriptor : DnDDescriptor) : void;
     hideDragFeedback?(context : EditorContext, dragDescriptor : DnDDescriptor) : void;
-    validate?(paper : dia.Paper) : Promise<Array<Marker>>;
+    validate?(paper : dia.Graph) : Promise<Map<string, Array<Marker>>>;
     preDelete?(context : EditorContext, deletedElement : dia.Cell) : void;
+    setDefaultContent?(editorContext : EditorContext, data : Map<string, Map<string, ElementMetadata>>) : void;
   }
 
 }

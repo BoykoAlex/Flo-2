@@ -369,4 +369,31 @@ flo-view {
   display: none;       /* by default, we don't display link options tool */
 }
 
+/* Make transparent the circle around the link-tools (cog) icon. It'll allow shape to have a circle clicking area */
+.link-tools .tool-options circle {
+  fill: transparent;
+  stroke: transparent;
+}
+
+.link-tools .tool-options path {
+  fill: black;
+  stroke: black;
+}
+
+.link-tools .tool-remove circle {
+  fill: red;
+  stroke: red;
+}
+
+.link-tools .tool-remove path {
+  fill: white;
+  stroke: white;
+}
+
+.link-tools-container {
+  stroke-width: 0;
+  fill: transparent;
+}
+
+
 /* END - FLO CANVAS STYLES */
