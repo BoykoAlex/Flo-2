@@ -75,10 +75,10 @@ class GraphToTextConverter {
   private nextLink() : dia.Link {
     let indegree : number = Number.MAX_VALUE;
     let currentBest : dia.Link;
-    for (let id in this.linksToVisit) {
+    for (let id of Array.from(this.linksToVisit)) {
       let link = <dia.Link> this.g.getCell(id);
       let source = this.g.getCell(link.get('source').id);
-      let currentInDegree = this.nodesInDegrees[source.get('id')];
+      let currentInDegree = this.nodesInDegrees.get(source.get('id'));
       if (currentInDegree === 0) {
         this.visitLink(link);
         return link;
@@ -104,19 +104,6 @@ class GraphToTextConverter {
     this.nodesInDegrees.set(id, this.nodesInDegrees.get(id) - 1);
     this.numberOfLinksToVisit--;
   }
-
-  // private visit(e : dia.Cell) : dia.Cell {
-  //   if (e.isLink()) {
-  //     this.linksToVisit.delete(e.get('id'));
-  //     let id = e.get('target').id;
-  //     this.nodesInDegrees.set(id, this.nodesInDegrees.get(id) - 1);
-  //     this.numberOfLinksToVisit--;
-  //   } else {
-  //     this.nodesToVisit.delete(e.get('id'));
-  //     this.numberOfNodesToVisit--;
-  //   }
-  //   return e;
-  // }
 
   /**
    * Starts at a link and proceeds down a chain. Converts each node to
