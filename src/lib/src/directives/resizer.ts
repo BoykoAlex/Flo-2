@@ -1,21 +1,24 @@
-import {Directive, Input, Output, EventEmitter, Inject, ElementRef, OnInit} from '@angular/core';
+import {Directive, Input, Output, EventEmitter, Inject, ElementRef, OnInit, OnDestroy,} from '@angular/core';
 import {DOCUMENT} from '@angular/platform-browser'
 import {Observable}  from 'rxjs/Observable';
 import 'rxjs/add/operator/sampleTime';
 import 'rxjs/add/observable/fromEvent';
+
+const { CompositeDisposable, Disposable } = require('rx');
 const $ = require('jquery');
 
 @Directive({
   selector: '[resizer]',
   host: {'(mousedown)': 'startDrag()'}
 })
-export class ResizerDirective implements OnInit {
+export class ResizerDirective implements OnInit, OnDestroy {
   private dragInProgress: boolean = false;
   private vertical: boolean = true;
   private first: string;
   private second: string;
   private _size: number;
   private _splitSize: number;
+  private _subscriptions = new CompositeDisposable();
   private mouseMoveHandler = (e: any) => {
     if (this.dragInProgress) {
       this.mousemove(e);
@@ -99,17 +102,6 @@ export class ResizerDirective implements OnInit {
   }
 
   constructor(private element: ElementRef, @Inject(DOCUMENT) private document: any) {
-    console.log('Building Resizer!!!');
-    Observable.fromEvent($(document), 'mousemove')
-      .sampleTime(300)
-      .subscribe(this.mouseMoveHandler);
-    Observable.fromEvent($(document), 'mouseup')
-      .subscribe(e => {
-        if (this.dragInProgress) {
-          this.mousemove(e);
-          this.dragInProgress = false;
-        }
-      });
   }
 
   private startDrag() {
@@ -130,5 +122,22 @@ export class ResizerDirective implements OnInit {
   ngOnInit() {
     // Need to set left and right elements width and fire events on init when DOM is built 
     this.splitSize = this._splitSize;
+
+    let subscription1 = Observable.fromEvent($(this.document), 'mousemove')
+      .sampleTime(300)
+      .subscribe(this.mouseMoveHandler);
+    this._subscriptions.add(Disposable.create(() => subscription1.unsubscribe()));
+    let subscription2 = Observable.fromEvent($(this.document), 'mouseup')
+      .subscribe(e => {
+        if (this.dragInProgress) {
+          this.mousemove(e);
+          this.dragInProgress = false;
+        }
+      });
+    this._subscriptions.add(Disposable.create(() => subscription2.unsubscribe()));
+  }
+
+  ngOnDestroy() {
+    this._subscriptions.dispoase();
   }
 } 

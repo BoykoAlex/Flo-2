@@ -24,6 +24,7 @@
       '@angular/forms': 'npm:@angular/forms/bundles/forms.umd.js',
 
       // other libraries
+      'rx': 'npm:rx',
       'rxjs': 'npm:rxjs',
       'jointjs': 'npm:jointjs',
       'jquery': 'npm:jquery',
@@ -41,6 +42,9 @@
             loader: 'systemjs-angular-loader.js'
           }
         }
+      },
+      rx: {
+        main: './dist/rx.js'
       },
       rxjs: {
         defaultExtension: 'js'

@@ -1,5 +1,4 @@
 import { Component, Input, ElementRef, EventEmitter, OnInit, OnDestroy, ViewEncapsulation, OnChanges, SimpleChanges} from '@angular/core';
-// import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import 'rxjs/add/operator/debounceTime';
 import { dia } from 'jointjs';
 import { Flo } from './../shared/flo.common';
@@ -8,6 +7,8 @@ import { Utils } from './editor.utils';
 const joint = require('jointjs');
 const $ = require('jquery');
 const _ = require('lodash');
+const { CompositeDisposable, Disposable } = require('rx');
+
 
 export interface VisibilityState {
   visibility : string;
@@ -104,25 +105,21 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
    */
   private _gridSize: number = 1;
 
-  /**
-   * Timed promise for asynchronously scheduled validation
-   */
-  private validationTimer: number;
-
-  /**
-   * Timer promise to sync graph representation with textual representation
-   */
-  private graphUpdateTimer: number;
-
   private _hiddenPalette : boolean = false;
 
   private editorContext : Flo.EditorContext;
 
   private _resizeHandler = () => this.autosizePaper();
 
+  private textToGraphEventEmitter = new EventEmitter<void>();
+
   private graphToTextEventEmitter = new EventEmitter<void>();
 
   private _graphToTextSyncEnabled = true;
+
+  private validationEventEmitter = new EventEmitter<void>();
+
+  private _disposables = new CompositeDisposable();
 
   constructor(private element: ElementRef) {
     let self = this;
@@ -153,7 +150,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
       }
 
       scheduleGraphUpdate() {
-        self.scheduleUpdateGraph();
+        self.textToGraphEventEmitter.emit();
       }
 
       updateGraph() : void {
@@ -261,6 +258,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
     this.initMetamodel();
 
     $(window).on('resize', this._resizeHandler);
+    this._disposables.add(Disposable.create(() => $(window).off('resize', this._resizeHandler)));
 
     /*
      * Execute resize to get the right size for the SVG element on the editor canvas.
@@ -271,7 +269,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnDestroy() {
-    this.dispose();
+    this._disposables.dispose();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -693,19 +691,6 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
-  dispose() : void {
-    if (this.paper) {
-      this.paper.off('dragging-node-over-canvas');
-    }
-    if (this.validationTimer) {
-      window.clearTimeout(this.validationTimer);
-    }
-    if (this.graphUpdateTimer) {
-      window.clearTimeout(this.graphUpdateTimer);
-    }
-    $(window).off('resize', this._resizeHandler);
-  }
-
   fitToPage() : void {
     let scrollBarSize = 17;
     let parent = $('#paper', this.element.nativeElement);
@@ -849,11 +834,20 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
   initMetamodel() {
     this.metamodel.load().then(data => {
       this.updateGraphRepresentation();
-      this.graphToTextEventEmitter.debounceTime(100).subscribe(() => {
+
+      let textSyncSubscription = this.graphToTextEventEmitter.debounceTime(300).subscribe(() => {
         if (this._graphToTextSyncEnabled) {
           this.updateTextRepresentation();
         }
       });
+      this._disposables.add(Disposable.create(() => textSyncSubscription.unsubscribe()));
+
+      let validationSubscription = this.validationEventEmitter.debounceTime(300).subscribe(() => this.validateGraph());
+      this._disposables.add(Disposable.create(() => validationSubscription.unsubscribe()));
+
+      let graphSyncSubscription = this.textToGraphEventEmitter.debounceTime(300).subscribe(() => this.updateGraphRepresentation());
+      this._disposables.add(Disposable.create(() => graphSyncSubscription.unsubscribe()));
+
       if (this.editor && this.editor.setDefaultContent) {
         this.editor.setDefaultContent(this.editorContext, data);
       }
@@ -867,6 +861,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
 
   postValidation() {
     console.log('Validation request posted');
+    this.validationEventEmitter.emit();
   }
 
   handleNodeCreation(node : dia.Element) {
@@ -1105,16 +1100,6 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
 
     // The paper is what will represent the graph on the screen
     this.paper = new joint.dia.Paper(options);
-  }
-
-  scheduleUpdateGraph() : void {
-    if (this.graphUpdateTimer) {
-      window.clearTimeout(this.graphUpdateTimer);
-    }
-    this.graphUpdateTimer = window.setTimeout(() => {
-      this.graphUpdateTimer = null;
-      this.updateGraphRepresentation();
-    }, 300 );
   }
 
 }
