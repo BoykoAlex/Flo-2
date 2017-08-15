@@ -35,12 +35,6 @@ joint.shapes.flo.PaletteGroupHeader = joint.shapes.basic.Generic.extend({
   }, joint.shapes.basic.Generic.prototype.defaults)
 });
 
-export interface PaletteDnDEvent {
-  type : string;
-  view : dia.CellView;
-  event : MouseEvent;
-}
-
 @Component({
   selector: 'flo-palette',
   templateUrl: './palette.component.html',
@@ -82,7 +76,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
   }
 
   @Output()
-  onPaletteEntryDrop = new EventEmitter<PaletteDnDEvent>();
+  onPaletteEntryDrop = new EventEmitter<Flo.DnDEvent>();
 
   private _paletteSize : number;
 
@@ -456,7 +450,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
     $(this.document).off('mousemove', this.mouseMoveHanlder);
   }
 
-  private trigger(event : PaletteDnDEvent) {
+  private trigger(event : Flo.DnDEvent) {
     console.debug('EVENT: type=' + event.type + ' element=' + event.view.model.attr('metadata/name') + ' x=' + event.event.pageX + ' y=' + event.event.pageY);
     this.onPaletteEntryDrop.emit(event);
   }

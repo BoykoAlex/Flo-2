@@ -1,9 +1,8 @@
 import { Component, Input, ElementRef, EventEmitter, OnInit, OnDestroy, ViewEncapsulation, OnChanges, SimpleChanges} from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+// import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import 'rxjs/add/operator/debounceTime';
 import { dia } from 'jointjs';
 import { Flo } from './../shared/flo.common';
-import { PaletteDnDEvent } from '../palette/palette.component';
 import { Shapes } from '../shared/shapes';
 import { Utils } from './editor.utils';
 const joint = require('jointjs');
@@ -249,30 +248,6 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit() {
-    // let graph: dia.Graph = new joint.dia.Graph();
-    //
-    // new joint.dia.Paper({
-    //   el: $('#paper', this.element.nativeElement),
-    //   model: graph,
-    //   gridSize: 1
-    // });
-    //
-    // let rect = new joint.shapes.basic.Rect({
-    //   position: {x: 100, y: 30},
-    //   size: {width: 100, height: 30},
-    //   attrs: {rect: {fill: 'blue'}, text: {text: 'my box', fill: 'white'}}
-    // });
-    //
-    // let rect2 = rect.clone();
-    // rect2.translate(300);
-    //
-    // let link = new joint.dia.Link({
-    //   source: {id: rect.id},
-    //   target: {id: rect2.id}
-    // });
-    //
-    // graph.addCells([rect, rect2, link]);
-
     console.log('Initializing my component');
 
     this.initGraph();
@@ -645,7 +620,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
     // }
   }
 
-  handleDnDFromPalette(dnDEvent : PaletteDnDEvent) {
+  handleDnDFromPalette(dnDEvent : Flo.DnDEvent) {
     if (dnDEvent.type === 'drop') {
       this.handleDropFromPalette(dnDEvent);
     } else {
@@ -653,7 +628,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  handleDragFromPalette(dnDEvent : PaletteDnDEvent) {
+  handleDragFromPalette(dnDEvent : Flo.DnDEvent) {
     console.log('Dragging from palette');
     if (dnDEvent.view && !this.readOnlyCanvas) {
       let location = this.paper.snapToGrid({x: dnDEvent.event.clientX, y: dnDEvent.event.clientY});
@@ -682,7 +657,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
-  handleDropFromPalette(event : PaletteDnDEvent) {
+  handleDropFromPalette(event : Flo.DnDEvent) {
     let cellview = event.view;
     let evt = event.event;
     if (this.paper.el === evt.target || $.contains(this.paper.el, evt.target)) {
@@ -719,6 +694,9 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   dispose() : void {
+    if (this.paper) {
+      this.paper.off('dragging-node-over-canvas');
+    }
     if (this.validationTimer) {
       window.clearTimeout(this.validationTimer);
     }
@@ -861,224 +839,6 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
       this.metamodel.textToGraph(this.editorContext, this.definition);
     }
   }
-
-  // TODO: must do cleanup for the `mainElementView'
-  // private mainElementView = joint.dia.ElementView.extend({
-  //   canShowTooltip: true,
-  //   beingDragged: false,
-  //   _tempZorder: 0,
-  //   _tempOpacity: 1.0,
-  //   _hovering: false,
-  //   pointerdown: function(evt : any, x : number, y : number) {
-  //     this.canShowTooltip = false;
-  //     this.hideTooltip();
-  //     this.beingDragged = false;
-  //     this._tempOpacity = this.model.attr('./opacity');
-  //
-  //     this.model.trigger('batch:start');
-  //
-  //     if ( // target is a valid magnet start linking
-  //     evt.target.getAttribute('magnet') &&
-  //     this.paper.options.validateMagnet.call(this.paper, this, evt.target)
-  //     ) {
-  //       var link = this.paper.getDefaultLink(this, evt.target);
-  //       if ($(evt.target).attr('type') === 'input') {
-  //         link.set({
-  //           source: { x: x, y: y },
-  //           target: {
-  //             id: this.model.id,
-  //             selector: this.getSelector(evt.target),
-  //             port: evt.target.getAttribute('port')
-  //           }
-  //         });
-  //       } else {
-  //         link.set({
-  //           source: {
-  //             id: this.model.id,
-  //             selector: this.getSelector(evt.target),
-  //             port: evt.target.getAttribute('port')
-  //           },
-  //           target: { x: x, y: y }
-  //         });
-  //       }
-  //       this.paper.model.addCell(link);
-  //       this._linkView = this.paper.findViewByModel(link);
-  //       if ($(evt.target).attr('type') === 'input') {
-  //         this._linkView.startArrowheadMove('source');
-  //       } else {
-  //         this._linkView.startArrowheadMove('target');
-  //       }
-  //       this.paper.__creatingLinkFromPort = true;
-  //     } else {
-  //       this._dx = x;
-  //       this._dy = y;
-  //
-  //       joint.dia.CellView.prototype.pointerdown.apply(this, arguments);
-  //     }
-  //   },
-  //   pointermove: function(evt : MouseEvent, x : number, y : number) {
-  //     var interactive = _.isFunction(this.options.interactive) ? this.options.interactive(this, 'pointermove') :
-  //       this.options.interactive;
-  //     if (interactive !== false && !this._linkView) {
-  //       this.beingDragged = true;
-  //       this.handleNodeDragging(this, this.getTargetViewFromEvent(evt, x, y, [ this ]), x, y, {'canvas': 'true'});
-  //       this.model.attr('./opacity', 0.75);
-  //     }
-  //     joint.dia.ElementView.prototype.pointermove.apply(this, arguments);
-  //   },
-  //   pointerup: function(evt : MouseEvent, x : number, y : number) { // jshint ignore:line
-  //     delete this.paper.__creatingLinkFromPort;
-  //     this.canShowTooltip = true;
-  //     if (this.beingDragged) {
-  //       if (typeof this._tempOpacity === 'number') {
-  //         this.model.attr('./opacity', this._tempOpacity);
-  //       } else {
-  //         // Joint JS view doesn't react to attribute removal.
-  //         // TODO: fix in the mainElementView
-  //         this.model.attr('./opacity', 1);
-  //         //					this.model.removeAttr('./opacity');
-  //       }
-  //       this.handleNodeDropping();
-  //     }
-  //     this.beingDragged = false;
-  //     joint.dia.ElementView.prototype.pointerup.apply(this, arguments);
-  //   },
-  //   events: {
-  //     // Tooltips on the elements in the graph
-  //     'mouseenter': function(evt : MouseEvent) {
-  //       if (this.canShowTooltip) {
-  //         this.showTooltip(evt.pageX, evt.pageY);
-  //       }
-  //       if (!this._hovering && !this.paper.__creatingLinkFromPort) {
-  //         this._hovering = true;
-  //         if (isChrome || isFF) {
-  //           this._tempZorder = this.model.get('z');
-  //           this.model.toFront({deep: true});
-  //         }
-  //       }
-  //     },
-  //     'mouseleave': function() {
-  //       this.hideTooltip();
-  //       if (this._hovering) {
-  //         this._hovering = false;
-  //         if (isChrome || isFF) {
-  //           this.model.set('z', this._tempZorder);
-  //           var z = this._tempZorder;
-  //           this.model.getEmbeddedCells({breadthFirst: true}).forEach(function(cell : dia.Cell) {
-  //             cell.set('z', ++z);
-  //           });
-  //         }
-  //       }
-  //     },
-  //     'mousemove': function(evt : MouseEvent) {
-  //       this.moveTooltip(evt.pageX, evt.pageY);
-  //     }
-  //   },
-  //   showTooltip: function(x : number, y : number) {
-  //     var mousex = x + 10;
-  //     var mousey = y + 10;
-  //
-  //     var nodeTooltip : HTMLElement;
-  //     if (this.model instanceof joint.dia.Element && this.model.attr('metadata')) {
-  //       nodeTooltip = document.createElement('div');
-  //       $(nodeTooltip).addClass('node-tooltip');
-  //
-  //       $(nodeTooltip).appendTo($('body')).fadeIn('fast');
-  //       $(nodeTooltip).addClass('tooltip-description');
-  //       var nodeTitle = document.createElement('div');
-  //       $(nodeTooltip).append(nodeTitle);
-  //       var nodeDescription = document.createElement('div');
-  //       $(nodeTooltip).append(nodeDescription);
-  //
-  //       var model = this.model;
-  //
-  //       if (model.attr('metadata/name')) {
-  //         var typeSpan = document.createElement('span');
-  //         $(typeSpan).addClass('tooltip-title-type');
-  //         $(nodeTitle).append(typeSpan);
-  //         $(typeSpan).text(model.attr('metadata/name'));
-  //         if (model.attr('metadata/group')) {
-  //           var groupSpan = document.createElement('span');
-  //           $(groupSpan).addClass('tooltip-title-group');
-  //           $(nodeTitle).append(groupSpan);
-  //           $(groupSpan).text('(' + model.attr('metadata/group') + ')');
-  //         }
-  //       }
-  //
-  //       model.attr('metadata').get('description').then(function(description : string) {
-  //         $(nodeDescription).text(description);
-  //       }, function(error : any) {
-  //         if (error) {
-  //           console.error(error);
-  //         }
-  //       });
-  //
-  //       // defaultValue
-  //       if (!model.attr('metadata/metadata/hide-tooltip-options')) {
-  //         model.attr('metadata').get('properties').then(function(metaProps : any) {
-  //           var props = model.attr('props'); // array of {'name':,'value':}
-  //           if (metaProps && props) {
-  //             Object.keys(props).sort().forEach(function(propertyName) {
-  //               if (metaProps[propertyName]) {
-  //                 var optionRow = document.createElement('div');
-  //                 var optionName = document.createElement('span');
-  //                 var optionDescription = document.createElement('span');
-  //                 $(optionName).addClass('node-tooltip-option-name');
-  //                 $(optionDescription).addClass('node-tooltip-option-description');
-  //                 $(optionName).text(metaProps[propertyName].name);
-  //                 $(optionDescription).text(props[propertyName]);//nodeOptionData[i].description);
-  //                 $(optionRow).append(optionName);
-  //                 $(optionRow).append(optionDescription);
-  //                 $(nodeTooltip).append(optionRow);
-  //               }
-  //               // This was the code to add every parameter in:
-  //               //			    				$(optionName).addClass('node-tooltip-option-name');
-  //               //			    				$(optionDescription).addClass('node-tooltip-option-description');
-  //               //			    				$(optionName).text(metaProps[propertyName].name);
-  //               //			    				$(optionDescription).text(metaProps[propertyName].description);
-  //               //			    				$(optionRow).append(optionName);
-  //               //			    				$(optionRow).append(optionDescription);
-  //               //			    				$(nodeTooltip).append(optionRow);
-  //             });
-  //           }
-  //         }, function(error : any) {
-  //           if (error) {
-  //             console.error(error);
-  //           }
-  //         });
-  //       }
-  //
-  //       $('.node-tooltip').css({ top: mousey, left: mousex });
-  //     } else if (this.model.get('type') === joint.shapes.flo.DECORATION_TYPE && this.model.attr('./kind') === 'error') {
-  //       console.debug('mouse enter: ERROR box=' + JSON.stringify(this.model.getBBox()));
-  //       nodeTooltip = document.createElement('div');
-  //       var errors = this.model.attr('messages');
-  //       if (errors && errors.length > 0) {
-  //         $(nodeTooltip).addClass('error-tooltip');
-  //         $(nodeTooltip).appendTo($('body')).fadeIn('fast');
-  //         var header = document.createElement('p');
-  //         $(header).text('Errors:');
-  //         $(nodeTooltip).append(header);
-  //         for (var i = 0;i < errors.length; i++) {
-  //           var errorElement = document.createElement('li');
-  //           $(errorElement).text(errors[i]);
-  //           $(nodeTooltip).append(errorElement);
-  //         }
-  //         $('.error-tooltip').css({ top: mousey, left: mousex });
-  //       }
-  //     }
-  //   },
-  //   hideTooltip: function() {
-  //     $('.node-tooltip').remove();
-  //     $('.error-tooltip').remove();
-  //   },
-  //   moveTooltip: function(x : number, y : number) {
-  //     $('.node-tooltip')
-  //       .css({ top: y + 10, left: x + 10 });
-  //     $('.error-tooltip')
-  //       .css({ top: y + 10, left: x + 10 });
-  //   }
-  // });
 
   updateTextRepresentation() : void {
     if (this.metamodel && this.metamodel.graphToText) {
@@ -1280,6 +1040,10 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
       }
     });
 
+    this.paper.on('dragging-node-over-canvas', (dndEvent : Flo.DnDEvent) => {
+      console.log(`Canvas DnD type = ${dndEvent.type}`);
+    });
+
     // JointJS now no longer grabs focus if working in a paper element - crude...
     $('#flow-view', this.element.nativeElement).on('mousedown', () => $('#palette-filter-textfield', this.element.nativeElement).focus());
   }
@@ -1291,7 +1055,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
       gridSize: this._gridSize,
       drawGrid: true,
       model: this.graph,
-      elementView: this.renderer && this.renderer.getNodeView ? this.renderer.getNodeView() : /*this.mainElementView*/joint.dia.ElementView,
+      elementView: this.renderer && this.renderer.getNodeView ? this.renderer.getNodeView() : joint.shapes.flo.ElementView/*joint.dia.ElementView*/,
       linkView: this.renderer && this.renderer.getLinkView ? this.renderer.getLinkView() : joint.shapes.flo.LinkView,
       // Enable link snapping within 25px lookup radius
       snapLinks: { radius: 25 }, // http://www.jointjs.com/tutorial/ports

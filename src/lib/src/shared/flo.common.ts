@@ -2,6 +2,12 @@ import { dia } from 'jointjs';
 
 export namespace Flo {
 
+  export interface DnDEvent {
+    type : string;
+    view : dia.CellView;
+    event : MouseEvent;
+  }
+
   export interface PropertyMetadata {
     readonly id : string;
     readonly name : string;
