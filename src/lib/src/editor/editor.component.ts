@@ -3,7 +3,7 @@ import { Component, Input, ElementRef, EventEmitter, OnInit, OnDestroy, ViewEnca
 import 'rxjs/add/operator/debounceTime';
 import { dia } from 'jointjs';
 import { Flo } from './../shared/flo.common';
-import { Shapes } from '../shared/shapes';
+import { Shapes, Constants } from '../shared/shapes';
 import { Utils } from './editor.utils';
 const joint = require('jointjs');
 const $ = require('jquery');
@@ -791,7 +791,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
 
     let errorMessages = markers.map(m => m.message);
 
-    let errorCell = cell.getEmbeddedCells().find(e => e.attr('./kind') === Shapes.ERROR_DECORATION_KIND);
+    let errorCell = cell.getEmbeddedCells().find(e => e.attr('./kind') === Constants.ERROR_DECORATION_KIND);
     if (errorCell) {
       if (errorMessages.length === 0) {
         errorCell.remove();
@@ -804,7 +804,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
         renderer: this.renderer,
         paper: this.paper,
         parent: cell,
-        kind: Shapes.ERROR_DECORATION_KIND,
+        kind: Constants.ERROR_DECORATION_KIND,
         messages: errorMessages
       });
       let pt : dia.Point;
@@ -1059,7 +1059,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
       linkView: this.renderer && this.renderer.getLinkView ? this.renderer.getLinkView() : joint.shapes.flo.LinkView,
       // Enable link snapping within 25px lookup radius
       snapLinks: { radius: 25 }, // http://www.jointjs.com/tutorial/ports
-      defaultLink: this.renderer && this.renderer.newLink ? this.renderer.newLink() : new joint.shapes.flo.Link(),
+      defaultLink: this.renderer && this.renderer.createDefaultLink ? this.renderer.createDefaultLink : new joint.shapes.flo.Link,
 
       // decide whether to create a link if the user clicks a magnet
       validateMagnet: (cellView : dia.ElementView, magnet : SVGElement) => {

@@ -452,11 +452,15 @@ joint.shapes.flo.ErrorDecoration = joint.shapes.basic.Generic.extend({
   }, joint.shapes.basic.Generic.prototype.defaults)
 });
 
-export namespace Shapes {
+export namespace Constants {
 
   export const REMOVE_HANDLE_TYPE = REMOVE;
 
   export const ERROR_DECORATION_KIND = ERROR;
+
+}
+
+export namespace Shapes {
 
   export interface CreationParams extends Flo.CreationParams {
     renderer? : Flo.Renderer;
@@ -499,7 +503,7 @@ export namespace Shapes {
      * Create a JointJS node that embeds extra metadata (properties).
      */
     static createNode(params : ElementCreationParams) : dia.Element {
-      let renderer : any = params.renderer;
+      let renderer : Flo.Renderer = params.renderer;
       let paper : dia.Paper = params.paper;
       let metadata : Flo.ElementMetadata = params.metadata;
       let position : dia.Point = params.position;
@@ -535,7 +539,7 @@ export namespace Shapes {
     }
 
     static createLink(params : LinkCreationParams) : dia.Link {
-      let renderer : any = params.renderer;
+      let renderer : Flo.Renderer = params.renderer;
       let paper : dia.Paper = params.paper;
       let metadata : Flo.ElementMetadata = params.metadata;
       let source : string = params.source;
@@ -572,7 +576,7 @@ export namespace Shapes {
     }
 
     static createDecoration(params : DecorationCreationParams) : dia.Element {
-      let renderer : any = params.renderer;
+      let renderer : Flo.Renderer = params.renderer;
       let paper : dia.Paper = params.paper;
       let parent : dia.Cell = params.parent;
       let kind : string = params.kind;
@@ -615,7 +619,7 @@ export namespace Shapes {
     }
 
     static createHandle(params : HandleCreationParams) : dia.Element {
-      let renderer : any = params.renderer;
+      let renderer : Flo.Renderer = params.renderer;
       let paper : dia.Paper = params.paper;
       let parent : dia.Cell = params.parent;
       let kind : string = params.kind;

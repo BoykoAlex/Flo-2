@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Flo } from 'spring-flo';
 const { Metamodel } = require('./metamodel');
+const { Renderer } = require('./renderer');
 
 
 @Component({
@@ -11,10 +12,12 @@ const { Metamodel } = require('./metamodel');
 export class AppComponent {
 
   metamodel : Flo.Metamodel;
+  renderer : Flo.Renderer;
 
   paletteSize = 170;
 
   constructor() {
     this.metamodel = new Metamodel();
+    this.renderer = new Renderer();
   }
 }

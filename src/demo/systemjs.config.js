@@ -29,7 +29,8 @@
       'jquery': 'npm:jquery',
       'backbone': 'npm:backbone',
       'lodash': 'npm:lodash',
-      'underscore': 'npm:lodash'
+      'underscore': 'npm:lodash',
+      'dagre': 'npm:dagre'
     },
     // packages tells the System loader how to load when no filename and/or no extension
     packages: {
@@ -55,6 +56,9 @@
       },
       lodash: {
         main: './index.js',
+      },
+      dagre: {
+        main: './dist/dagre.js'
       },
       'spring-flo': {
         main: 'index.js',

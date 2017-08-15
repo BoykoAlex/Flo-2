@@ -100,17 +100,18 @@ export namespace Flo {
   }
 
   export interface Renderer {
-    createNode?(params : CreationParams) : dia.Element;
-    newLink?() : dia.Link;
-    createHandle?(params : HandleCreationParams) : dia.Element;
-    createDecoration?(params : DecorationCreationParams) : dia.Element;
+    createNode?(metadata : ElementMetadata, props : Map<string, any>) : dia.Element;
+    createLink?(source : string, target : string, metadata : ElementMetadata, props : Map<string, any>) : dia.Link;
+    createDefaultLink?(cellView : dia.ElementView, magnet : HTMLElement) : dia.Link;
+    createHandle?(kind : string, parent : dia.Cell) : dia.Element;
+    createDecoration?(kind : string, parent : dia.Cell) : dia.Element;
     initializeNewNode?(node : dia.Element, viewerDescriptor : ViewerDescriptor) : void;
     initializeNewLink?(link : dia.Link, viewerDescriptor : ViewerDescriptor) : void;
     initializeNewHandle?(handle : dia.Element, viewerDescriptor : ViewerDescriptor) : void;
     initializeNewDecoration?(decoration : dia.Element, viewerDescriptor : ViewerDescriptor) : void;
     getNodeView?() : dia.ElementView;
     getLinkView?() : dia.LinkView;
-    layout?(paper : dia.Paper) : Promise<void>;
+    layout?(paper : dia.Paper) : Promise<any>;
     handleLinkEvent?(paper : dia.Paper, event : string, link : dia.Link) : void;
     isSemanticProperty?(propertyPath : string, element : dia.Cell) : boolean;
     refreshVisuals?(cell : dia.Cell, propertyPath : string, paper : dia.Paper) : void;
