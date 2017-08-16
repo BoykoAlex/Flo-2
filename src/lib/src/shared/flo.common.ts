@@ -106,8 +106,7 @@ export namespace Flo {
 
   export interface Renderer {
     createNode?(metadata : ElementMetadata, props : Map<string, any>) : dia.Element;
-    createLink?(source : string, target : string, metadata : ElementMetadata, props : Map<string, any>) : dia.Link;
-    createDefaultLink?(cellView : dia.ElementView, magnet : HTMLElement) : dia.Link;
+    createLink?(source : LinkEnd, target : LinkEnd, metadata : ElementMetadata, props : Map<string, any>) : dia.Link;
     createHandle?(kind : string, parent : dia.Cell) : dia.Element;
     createDecoration?(kind : string, parent : dia.Cell) : dia.Element;
     initializeNewNode?(node : dia.Element, viewerDescriptor : ViewerDescriptor) : void;
@@ -140,15 +139,15 @@ export namespace Flo {
     getMaxZoom() : number;
     getZoomStep() : number;
     fitToPage() : void;
-    createNode(metadata : Flo.ElementMetadata, props : Map<string, any>, position : dia.Point) : dia.Element;
-    createLink(source : string, target : string, metadata : Flo.ElementMetadata, props : Map<string, any>) : dia.Link;
+    createNode(metadata : ElementMetadata, props : Map<string, any>, position : dia.Point) : dia.Element;
+    createLink(source : LinkEnd, target : LinkEnd, metadata : ElementMetadata, props : Map<string, any>) : dia.Link;
     deleteSelectedNode() : void;
     postValidation() : void;
   }
 
   export interface LinkEndDescriptor {
     view : dia.CellView;
-    selector? : string;
+    cssClassSelector? : string;
   }
 
   export interface DnDDescriptor {
@@ -156,6 +155,12 @@ export namespace Flo {
     range?: number;
     source? : LinkEndDescriptor;
     target? : LinkEndDescriptor;
+  }
+
+  export interface LinkEnd {
+    id : string;
+    selector? : string;
+    port? : string;
   }
 
   export enum Severity {
@@ -183,6 +188,17 @@ export namespace Flo {
     validate?(graph : dia.Graph) : Promise<Map<string, Array<Marker>>>;
     preDelete?(context : EditorContext, deletedElement : dia.Cell) : void;
     setDefaultContent?(editorContext : EditorContext, data : Map<string, Map<string, ElementMetadata>>) : void;
+  }
+
+  export function findMagnetByClass(view : dia.CellView, className : string) : HTMLElement {
+    if (className && className.startsWith('.')) {
+      className = className.substr(1);
+    }
+    return view.$('[magnet]').toArray().find(magnet => magnet.getAttribute('class').split(/\s+/).indexOf(className) >= 0);
+  }
+
+  export function findMagnetByPort(view : dia.CellView, port : string) : HTMLElement {
+    return view.$('[magnet]').toArray().find(magnet => magnet.getAttribute('port') === port);
   }
 
 }

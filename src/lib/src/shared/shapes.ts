@@ -477,8 +477,8 @@ export namespace Shapes {
   }
 
   export interface LinkCreationParams extends CreationParams {
-    source : string;
-    target : string;
+    source : Flo.LinkEnd;
+    target : Flo.LinkEnd;
   }
 
   export interface EmbeddedChildCreationParams extends CreationParams {
@@ -546,8 +546,8 @@ export namespace Shapes {
       let renderer : Flo.Renderer = params.renderer;
       let paper : dia.Paper = params.paper;
       let metadata : Flo.ElementMetadata = params.metadata;
-      let source : string = params.source;
-      let target : string = params.target;
+      let source = params.source;
+      let target = params.target;
       let props : Map<string, any> = params.props;
       let graph : dia.Graph= params.graph || (params.paper ? params.paper.model : undefined);
 
@@ -563,7 +563,9 @@ export namespace Shapes {
       if (metadata) {
         link.attr('metadata', metadata);
       }
-      link.attr('props', props);
+      if (props) {
+        link.attr('props', props);
+      }
       if (graph) {
         graph.addCell(link);
       }

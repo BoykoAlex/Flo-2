@@ -72,7 +72,7 @@ export class Renderer implements Flo.Renderer {
       }
     }
 
-    createLink(source : string, target : string, metadata : Flo.ElementMetadata, props : Map<string, any>) : dia.Link {
+    createLink(source : Flo.LinkEnd, target : Flo.LinkEnd, metadata : Flo.ElementMetadata, props : Map<string, any>) : dia.Link {
       return new joint.shapes.flo.Link(joint.util.deepSupplement({
         smooth: true,
         attrs: {

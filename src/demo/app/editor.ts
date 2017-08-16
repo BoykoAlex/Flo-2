@@ -67,10 +67,10 @@ export class Editor implements Flo.Editor {
         // it into the flow directly without the user needing to do more link
         // drawing
         let type = source.attr('metadata/name');
-        if (dragDescriptor.target.selector === '.output-port') {
+        if (dragDescriptor.target.cssClassSelector === '.output-port') {
           this.moveNodeOnNode(context, <dia.Element> source, <dia.Element> target, 'right', true);
           relinking = true;
-        } else if (dragDescriptor.target.selector === '.input-port') {
+        } else if (dragDescriptor.target.cssClassSelector === '.input-port') {
           this.moveNodeOnNode(context, <dia.Element> source, <dia.Element> target, 'left', true);
           relinking = true;
         }
@@ -126,11 +126,11 @@ export class Editor implements Flo.Editor {
                   closestData = {
                     source: {
                       view: draggedView,
-                      selector: type === 'output' ? '.input-port' : '.output-port'
+                      cssClassSelector: type === 'output' ? '.input-port' : '.output-port'
                     },
                     target: {
                       view: view,
-                      selector: '.' + type+'-port'
+                      cssClassSelector: '.' + type+'-port'
                     },
                     range: minDistance
                   };
@@ -145,7 +145,7 @@ export class Editor implements Flo.Editor {
       }
 
       // Check if drop on a link is allowed
-      if (targetUnderMouse instanceof joint.dia.Link &&
+      if (targetUnderMouse instanceof joint.dia.LinkView &&
         sourceGroup === 'processor' &&
         graph.getConnectedLinks(source).length === 0) { // jshint ignore:line
         return {
@@ -355,20 +355,44 @@ export class Editor implements Flo.Editor {
      * to the original link target.
      */
     moveNodeOnLink(context : Flo.EditorContext, node : dia.Element, link : dia.Link, shouldRepairDamage : boolean) {
-      // var source = link.get('source').id;
-      // var target = link.get('target').id;
-      //
-      // if (shouldRepairDamage) {
-      //   repairDamage(flo, node);
-      // }
-      // link.remove();
-      //
-      // if (source) {
-      //   flo.createLink({'id': source,'selector': '.output-port'}, {'id': node.id,'selector': '.input-port'});
-      // }
-      // if (target) {
-      //   flo.createLink({'id': node.id,'selector': '.output-port'}, {'id': target,'selector': '.input-port'});
-      // }
+      let source = link.get('source').id;
+      let target = link.get('target').id;
+
+      if (shouldRepairDamage) {
+        this.repairDamage(context, node);
+      }
+      link.remove();
+
+      if (source) {
+        let sourceView = context.getPaper().findViewByModel(context.getGraph().getCell(source));
+        let magnetS = Flo.findMagnetByClass(sourceView, '.output-port');
+        let targetView = context.getPaper().findViewByModel(node);
+        let magnetT = Flo.findMagnetByClass(targetView, '.input-port');
+        let sourceEnd : Flo.LinkEnd = {id: sourceView.model.id, selector: sourceView.getSelector(magnetS, null)};
+        if (magnetS.getAttribute('port')) {
+          sourceEnd.port = magnetS.getAttribute('port');
+        }
+        let targetEnd : Flo.LinkEnd = {id: targetView.model.id, selector: targetView.getSelector(magnetT, null)};
+        if (magnetT.getAttribute('port')) {
+          targetEnd.port = magnetT.getAttribute('port');
+        }
+        context.createLink(sourceEnd, targetEnd, null, null);
+      }
+      if (target) {
+        let sourceView = context.getPaper().findViewByModel(node);
+        let magnetS = Flo.findMagnetByClass(sourceView, '.output-port');
+        let targetView = context.getPaper().findViewByModel(context.getGraph().getCell(target));
+        let magnetT = Flo.findMagnetByClass(targetView, '.input-port');
+        let sourceEnd : Flo.LinkEnd = {id: sourceView.model.id, selector: sourceView.getSelector(magnetS, null)};
+        if (magnetS.getAttribute('port')) {
+          sourceEnd.port = magnetS.getAttribute('port');
+        }
+        let targetEnd : Flo.LinkEnd = {id: targetView.model.id, selector: targetView.getSelector(magnetT, null)};
+        if (magnetT.getAttribute('port')) {
+          targetEnd.port = magnetT.getAttribute('port');
+        }
+        context.createLink(sourceEnd, targetEnd, null, null);
+      }
     }
 
     /**

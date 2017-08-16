@@ -209,7 +209,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
         return self.createNode(metadata, props, position);
       }
 
-      createLink(source : string, target : string, metadata : Flo.ElementMetadata, props : Map<string, any>) : dia.Link {
+      createLink(source : Flo.LinkEnd, target : Flo.LinkEnd, metadata : Flo.ElementMetadata, props : Map<string, any>) : dia.Link {
         return self.createLink(source, target, metadata, props);
       }
 
@@ -409,14 +409,15 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
     this._readOnlyCanvas = value;
   }
 
-  _findMagnetByClass(view : dia.CellView, className : string) : HTMLElement {
-    if (className && className.startsWith('.')) {
-        className = className.substr(1);
-    }
-    return view.$('[magnet]').toArray().find(function(magnet) {
-      return magnet.getAttribute('class').split(/\s+/).indexOf(className) >= 0;
-    });
-  }
+  // _findMagnetByClass(view : dia.CellView, className : string) : HTMLElement {
+  //   if (className && className.startsWith('.')) {
+  //       className = className.substr(1);
+  //   }
+  //   return view.$('[magnet]').toArray().find(function(magnet) {
+  //     return magnet.getAttribute('class').split(/\s+/).indexOf(className) >= 0;
+  //   });
+  // }
+  //
 
   /**
    * Displays graphical feedback for the drag and drop in progress based on current drag and drop descriptor object
@@ -431,8 +432,8 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
       let magnet : HTMLElement;
       if (dragDescriptor.source && dragDescriptor.source.view) {
         joint.V(dragDescriptor.source.view.el).addClass('dnd-source-feedback');
-        if (dragDescriptor.source.selector) {
-          magnet = this._findMagnetByClass(dragDescriptor.source.view, dragDescriptor.source.selector);
+        if (dragDescriptor.source.cssClassSelector) {
+          magnet = Flo.findMagnetByClass(dragDescriptor.source.view, dragDescriptor.source.cssClassSelector);
           if (magnet) {
             joint.V(magnet).addClass('dnd-source-feedback');
           }
@@ -440,8 +441,8 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
       }
       if (dragDescriptor.target && dragDescriptor.target.view) {
         joint.V(dragDescriptor.target.view.el).addClass('dnd-target-feedback');
-        if (dragDescriptor.target.selector) {
-          magnet = this._findMagnetByClass(dragDescriptor.target.view, dragDescriptor.target.selector);
+        if (dragDescriptor.target.cssClassSelector) {
+          magnet = Flo.findMagnetByClass(dragDescriptor.target.view, dragDescriptor.target.cssClassSelector);
           if (magnet) {
             joint.V(magnet).addClass('dnd-target-feedback');
           }
@@ -463,8 +464,8 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
       let magnet : HTMLElement;
       if (dragDescriptor.source && dragDescriptor.source.view) {
         joint.V(dragDescriptor.source.view.el).removeClass('dnd-source-feedback');
-        if (dragDescriptor.source.selector) {
-          magnet = this._findMagnetByClass(dragDescriptor.source.view, dragDescriptor.source.selector);
+        if (dragDescriptor.source.cssClassSelector) {
+          magnet = Flo.findMagnetByClass(dragDescriptor.source.view, dragDescriptor.source.cssClassSelector);
           if (magnet) {
             joint.V(magnet).removeClass('dnd-source-feedback');
           }
@@ -472,8 +473,8 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
       }
       if (dragDescriptor.target && dragDescriptor.target.view) {
         joint.V(dragDescriptor.target.view.el).removeClass('dnd-target-feedback');
-        if (dragDescriptor.target.selector) {
-          magnet = this._findMagnetByClass(dragDescriptor.target.view, dragDescriptor.target.selector);
+        if (dragDescriptor.target.cssClassSelector) {
+          magnet = Flo.findMagnetByClass(dragDescriptor.target.view, dragDescriptor.target.cssClassSelector);
           if (magnet) {
             joint.V(magnet).removeClass('dnd-target-feedback');
           }
@@ -501,9 +502,9 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
         this.highlighted.target &&
         dragDescriptor.target &&
         this.highlighted.source.view.model === dragDescriptor.source.view.model &&
-        this.highlighted.source.selector === dragDescriptor.source.selector &&
+        this.highlighted.source.cssClassSelector === dragDescriptor.source.cssClassSelector &&
         this.highlighted.target.view.model === dragDescriptor.target.view.model &&
-        this.highlighted.target.selector === dragDescriptor.target.selector) {
+        this.highlighted.target.cssClassSelector === dragDescriptor.target.cssClassSelector) {
         return;
       }
     }
@@ -613,9 +614,6 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
       this._restoreNodeVisibility(excluded.el, oldVisibility[i]);
     });
     return this.paper.findView(targetElement);
-    // if (view) {
-    //   return view.model;
-    // }
   }
 
   handleDnDFromPalette(dndEvent : Flo.DnDEvent) {
@@ -635,7 +633,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
     console.log('Dragging from palette');
     if (dnDEvent.view && !this.readOnlyCanvas) {
       let location = this.paper.snapToGrid({x: dnDEvent.event.clientX, y: dnDEvent.event.clientY});
-      this.handleNodeDragging(dnDEvent.view,  this.getTargetViewFromEvent(dnDEvent.event, location.x, location.y), location.x, location.y, Constants.PALETTE_CONTEXT);
+      this.handleNodeDragging(dnDEvent.view,  this.getTargetViewFromEvent(dnDEvent.event, location.x, location.y, [dnDEvent.view]), location.x, location.y, Constants.PALETTE_CONTEXT);
     }
   }
 
@@ -649,7 +647,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
-  createLink(source : string, target : string, metadata : Flo.ElementMetadata, props : Map<string, any>) : dia.Link {
+  createLink(source : Flo.LinkEnd, target : Flo.LinkEnd, metadata : Flo.ElementMetadata, props : Map<string, any>) : dia.Link {
     return Shapes.Factory.createLink({
       renderer: this.renderer,
       paper: this.paper,
@@ -676,7 +674,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
          * element would be the newly created element because
          * it's under the mouse pointer
          */
-        let targetElement = this.getTargetViewFromEvent(evt, position.x, position.y);
+        let targetElement = this.getTargetViewFromEvent(evt, position.x, position.y, [ event.view ]);
         let newNode = this.createNode(metadata, props, position);
         let newView = this.paper.findViewByModel(newNode);
 
@@ -1045,7 +1043,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
       let location = this.paper.snapToGrid({x: dndEvent.event.clientX, y: dndEvent.event.clientY});
       switch (dndEvent.type) {
         case Flo.DnDEventType.DRAG:
-          this.handleNodeDragging(dndEvent.view, this.getTargetViewFromEvent(dndEvent.event, location.x, location.y), location.x, location.y, Constants.CANVAS_CONTEXT);
+          this.handleNodeDragging(dndEvent.view, this.getTargetViewFromEvent(dndEvent.event, location.x, location.y, [ dndEvent.view ]), location.x, location.y, Constants.CANVAS_CONTEXT);
           break;
         case Flo.DnDEventType.DROP:
           this.handleNodeDropping();
@@ -1070,7 +1068,27 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
       linkView: this.renderer && this.renderer.getLinkView ? this.renderer.getLinkView() : joint.shapes.flo.LinkView,
       // Enable link snapping within 25px lookup radius
       snapLinks: { radius: 25 }, // http://www.jointjs.com/tutorial/ports
-      defaultLink: this.renderer && this.renderer.createDefaultLink ? this.renderer.createDefaultLink : new joint.shapes.flo.Link,
+      defaultLink: /*this.renderer && this.renderer.createDefaultLink ? this.renderer.createDefaultLink : new joint.shapes.flo.Link*/
+        (cellView: dia.ElementView, magnet: HTMLElement) => {
+          if (this.renderer && this.renderer.createLink) {
+            let linkEnd : Flo.LinkEnd = {
+              id: cellView.model.id
+            }
+            if (magnet) {
+              linkEnd.selector = cellView.getSelector(magnet, null);
+            }
+            if (magnet.getAttribute('port')) {
+              linkEnd.port = magnet.getAttribute('port');
+            }
+            if (magnet.getAttribute('type') === 'input') {
+              return this.renderer.createLink(null, linkEnd, null, null);
+            } else {
+              return this.renderer.createLink(linkEnd, null, null, null)
+            }
+          } else {
+            return new joint.shapes.flo.Link();
+          }
+        },
 
       // decide whether to create a link if the user clicks a magnet
       validateMagnet: (cellView : dia.ElementView, magnet : SVGElement) => {

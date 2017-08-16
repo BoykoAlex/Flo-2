@@ -153,9 +153,9 @@ textarea:input:focus {
   100%  { stroke-width: 1; }
 }
 
-.dnd-source-feedback.joint-element .box {
-  animation: flash-stroke-width 2s linear infinite;
-}
+/*.dnd-source-feedback.joint-element .box {*/
+  /*animation: flash-stroke-width 2s linear infinite;*/
+/*}*/
 .dnd-target-feedback.joint-element .box {
   animation: flash-stroke-width 2s linear infinite;
 }
