@@ -16,16 +16,26 @@
     <div id="paper-container">
       <div id="paper" class="paper" tabindex="0" style="overflow: hidden; position: absolute; display: block; height:100%; width:100%; overflow:auto;"></div>
 
-    <!--
-    <span class="canvas-controls-container" ng-if="canvasControls">
-                                <table ng-if="canvasControls.zoom" class="canvas-control zoom-canvas-control"><tbody><tr>
-                                    <td><input class="zoom-canvas-input canvas-control zoom-canvas-control" type="text" data-inline="true" ng-model="flo.zoomPercent" ng-model-options="{ getterSetter: true, updateOn: \'blur change\' }" size="3"></input>
-                                    <label class="canvas-control zoom-canvas-label">%</label></td>
-                                    <td><input type="range" data-inline="true" ng-model="flo.zoomPercent" ng-model-options="{ getterSetter: true }" step="{{flo.getZoomStep()}}" max="{{flo.getMaxZoom()}}" min="{{flo.getMinZoom()}}" data-type="range" name="range" class="canvas-control zoom-canvas-control"></input></td>
-                                </tr></tbody></table>
-                            </span>
-    <div id="properties" class="properties" style="position:absolute; bottom:0; width:100%; overflow:auto;"></div>
-    -->
+      <span class="canvas-controls-container" ng-if="canvasControls">
+        <table ng-if="canvasControls.zoom" class="canvas-control zoom-canvas-control">
+          <tbody>
+            <tr>
+              <td>
+                <input class="zoom-canvas-input canvas-control zoom-canvas-control" type="text"
+                                               data-inline="true" [(ngModel)]="zoomPercent"
+                                               size="3">
+                <label class="canvas-control zoom-canvas-label">%</label>
+              </td>
+              <td>
+                <input type="range" data-inline="true" [(ngModel)]="zoomPercent"
+                                               [step]="zoomStep"
+                                               [max]="maxZoom" [min]="minZoom" data-type="range"
+                                               name="range" class="canvas-control zoom-canvas-control">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </span>
     </div>
   </div>
   <div id="hook"></div>

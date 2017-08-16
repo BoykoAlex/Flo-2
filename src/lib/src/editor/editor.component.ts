@@ -1,4 +1,5 @@
 import { Component, Input, ElementRef, EventEmitter, OnInit, OnDestroy, ViewEncapsulation, OnChanges, SimpleChanges} from '@angular/core';
+import { NgModel } from '@angular/forms';
 import 'rxjs/add/operator/debounceTime';
 import { dia } from 'jointjs';
 import { Flo } from './../shared/flo.common';

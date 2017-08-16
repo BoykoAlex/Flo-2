@@ -26,9 +26,11 @@ const joint = require('jointjs');
 export class Editor implements Flo.Editor {
 
     createHandles(context : Flo.EditorContext, createHandle : (owner : dia.CellView, kind : string, action : () => void, location : dia.Point) => void, owner : dia.CellView) {
-      let bbox : any = owner.getBBox();
-      let pt = bbox.origin().offset(bbox.width + 3, bbox.height + 3);
-      createHandle(owner, Constants.REMOVE_HANDLE_TYPE, context.deleteSelectedNode, pt);
+      if (owner.model instanceof joint.dia.Element) {
+        let bbox : any = (<dia.Element> owner.model).getBBox();
+        let pt = bbox.origin().offset(bbox.width + 3, bbox.height + 3);
+        createHandle(owner, Constants.REMOVE_HANDLE_TYPE, context.deleteSelectedNode, pt);
+      }
     }
 
     validatePort(context : Flo.EditorContext, view : dia.ElementView, magnet : SVGElement) {
