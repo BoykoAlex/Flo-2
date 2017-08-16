@@ -62,10 +62,11 @@ export class Renderer implements Flo.Renderer {
       let metadata : Flo.ElementMetadata = node.attr('metadata');
       if (metadata) {
         node.attr('.label/text', node.attr('metadata/name'));
-        if (node.attr('metadata/constraints/maxIncomingLinksNumber') === 0) {
+        let group = node.attr('metadata/group');
+        if (group === 'source') {
           node.attr('.input-port/display','none');
         }
-        if (node.attr('metadata/constraints/maxOutgoingLinksNumber') === 0) {
+        if (group === 'sink') {
           node.attr('.output-port/display','none');
         }
       }

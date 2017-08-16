@@ -63,7 +63,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
   metamodel : Flo.Metamodel;
 
   @Input()
-  renderer : any;
+  renderer : Flo.Renderer;
 
   @Input()
   paletteEntryPadding : dia.Size = {width:12, height:12};
