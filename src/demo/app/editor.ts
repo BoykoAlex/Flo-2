@@ -37,7 +37,7 @@ export class Editor implements Flo.Editor {
 
     validateLink(context : Flo.EditorContext, cellViewS : dia.ElementView, magnetS : SVGElement, cellViewT : dia.ElementView, magnetT : SVGElement, isSource : boolean, linkView : dia.LinkView) {
       // Prevent linking from input ports.
-      if (magnetS && magnetS.getAttribute('type') === 'input') {
+      if (magnetS && magnetS.getAttribute('port') === 'input') {
         return false;
       }
       // Prevent linking from output ports to input ports within one element.
@@ -45,7 +45,7 @@ export class Editor implements Flo.Editor {
         return false;
       }
       // Prevent linking to input ports.
-      if (magnetT && magnetT.getAttribute('type') === 'output') {
+      if (magnetT && magnetT.getAttribute('port') === 'output') {
         return false;
       }
       return cellViewS.model && cellViewT.model && !(cellViewS.model instanceof joint.shapes.flo.ErrorDecoration) && !(cellViewT.model instanceof joint.shapes.flo.ErrorDecoration);
@@ -114,7 +114,7 @@ export class Editor implements Flo.Editor {
             let targetHasIncomingPort = targetGroup !== 'source';
             let targetHasOutgoingPort = targetGroup !== 'sink';
             view.$('[magnet]').each((index : number, magnet : HTMLElement) => {
-              let type = magnet.getAttribute('type');
+              let type = magnet.getAttribute('port');
               if ((type === 'input' && targetHasIncomingPort && hasOutgoingPort) || (type === 'output' && targetHasOutgoingPort && hasIncomingPort)) {
                 let bbox = joint.V(magnet).bbox(false, paper.viewport); // jshint ignore:line
                 let distance = (<any> point).distance({
@@ -167,8 +167,78 @@ export class Editor implements Flo.Editor {
 
     validate(graph : dia.Graph) : Promise<Map<string, Array<Flo.Marker>>> {
       return new Promise((resolve, reject) => {
-        let markers = new Map<string, Array<Flo.Marker>>();
-        resolve(markers);
+        let allMarkers = new Map<string, Array<Flo.Marker>>();
+        graph.getElements().filter(e => e.attr('metadata')).forEach(e => {
+          let markers : Array<Flo.Marker> = []
+          let group = e.attr('metadata/group');
+          if (e.attr('metadata/unresolved')) {
+            markers.push({
+              severity: Flo.Severity.Error,
+              range: e.attr('range'),
+              message: `Unknown element '${e.attr('metadata/name')}` + (group ? ` from group '${e.attr('metadata/group')}'` : '')
+            });
+          } else if (group) {
+            let links = graph.getConnectedLinks(e);
+            let outgoingLinksNumber = links.filter(l => l.get('source').id === e.id).length;
+            let incomingLinksNumber = links.filter(l => l.get('target').id === e.id).length;
+            if (group === 'sink') {
+              if (outgoingLinksNumber > 0) {
+                markers.push({
+                  severity: Flo.Severity.Error,
+                  range: e.attr('range'),
+                  message: `Sink node cannot have outgoing links`
+                });
+              }
+              if (incomingLinksNumber > 1) {
+                markers.push({
+                  severity: Flo.Severity.Error,
+                  range: e.attr('range'),
+                  message: `Sink node cannot have more than one incoming link`
+                });
+              }
+            } else if (group === 'source') {
+              if (outgoingLinksNumber > 1) {
+                markers.push({
+                  severity: Flo.Severity.Error,
+                  range: e.attr('range'),
+                  message: `Source node cannot have more than one outgoing link`
+                });
+              }
+              if (incomingLinksNumber > 0) {
+                markers.push({
+                  severity: Flo.Severity.Error,
+                  range: e.attr('range'),
+                  message: `Sink node cannot have incoming links`
+                });
+              }
+            } else if (group === 'processor') {
+              if (outgoingLinksNumber > 1) {
+                markers.push({
+                  severity: Flo.Severity.Error,
+                  range: e.attr('range'),
+                  message: `Processor node cannot have more than one outgoing link`
+                });
+              }
+              if (incomingLinksNumber > 1) {
+                markers.push({
+                  severity: Flo.Severity.Error,
+                  range: e.attr('range'),
+                  message: `Processor node cannot have more than one incoming link`
+                });
+              }
+            } else {
+              markers.push({
+                severity: Flo.Severity.Error,
+                range: e.attr('range'),
+                message: `Unknown element '${e.attr('metadata/name')} from group '${e.attr('metadata/group')}'`
+              });
+            }
+          }
+          if (markers.length) {
+            allMarkers.set(e.id, markers);
+          }
+        });
+        resolve(allMarkers);
       });
       // var errors = [];
       // var graph = flo.getGraph();

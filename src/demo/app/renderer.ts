@@ -143,7 +143,7 @@ export class Renderer implements Flo.Renderer {
 
     getLinkAnchorPoint(linkView : dia.LinkView, view : dia.ElementView, magnet : SVGElement, reference : dia.Point) : dia.Point {
       if (magnet) {
-        let type = magnet.getAttribute('type');
+        let type = magnet.getAttribute('port');
         let bbox = joint.V(magnet).bbox(false, (<any>linkView).paper.viewport);
         let rect = joint.g.rect(bbox);
         if (type === 'input') {

@@ -749,14 +749,10 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
 
   validateGraph() : void {
     if (this.editor && this.editor.validate) {
-      this.editor.validate(this.graph).then(allMarkers => {
-        for (let id in allMarkers.keys()) {
-          let cell = this.graph.getCell(id);
-          if (cell) {
-            this.markElement(cell, allMarkers.get(id));
-          }
-        }
-      });
+      this.editor
+        .validate(this.graph)
+        .then(allMarkers => this.graph.getCells()
+          .forEach(cell => this.markElement(cell, allMarkers.has(cell.id) ? allMarkers.get(cell.id) : [])));
     }
   }
 
@@ -1080,7 +1076,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
             if (magnet.getAttribute('port')) {
               linkEnd.port = magnet.getAttribute('port');
             }
-            if (magnet.getAttribute('type') === 'input') {
+            if (magnet.getAttribute('port') === 'input') {
               return this.renderer.createLink(null, linkEnd, null, null);
             } else {
               return this.renderer.createLink(linkEnd, null, null, null)

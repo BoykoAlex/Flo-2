@@ -112,7 +112,7 @@ joint.shapes.flo.Node = joint.shapes.basic.Generic.extend({
         'stroke-width': 1
       },
       '.input-port': {
-        type: 'input',
+        port: 'input',
         height: 8, width: 8,
         magnet: true,
         fill: '#eeeeee',
@@ -121,7 +121,7 @@ joint.shapes.flo.Node = joint.shapes.basic.Generic.extend({
         'stroke-width': 1
       },
       '.output-port': {
-        type: 'output',
+        port: 'output',
         height: 8, width: 8,
         magnet: true,
         fill: '#eeeeee',
@@ -240,7 +240,7 @@ joint.shapes.flo.ElementView = joint.dia.ElementView.extend({
       this.paper.options.validateMagnet.call(this.paper, this, evt.target)
     ) {
       let link = this.paper.getDefaultLink(this, evt.target);
-      if ($(evt.target).attr('type') === 'input') {
+      if ($(evt.target).attr('port') === 'input') {
         link.set({
           source: { x: x, y: y },
           target: {
@@ -261,7 +261,7 @@ joint.shapes.flo.ElementView = joint.dia.ElementView.extend({
       }
       this.paper.model.addCell(link);
       this._linkView = this.paper.findViewByModel(link);
-      if ($(evt.target).attr('type') === 'input') {
+      if ($(evt.target).attr('port') === 'input') {
         this._linkView.startArrowheadMove('source');
       } else {
         this._linkView.startArrowheadMove('target');
@@ -526,8 +526,12 @@ export namespace Shapes {
         node.attr('.label/text', metadata.name);
       }
       node.set('type', joint.shapes.flo.NODE_TYPE);
-      node.set('position', position);
-      node.attr('props', props);
+      if (position) {
+        node.set('position', position);
+      }
+      if (props) {
+        Array.from(props.keys()).forEach(key => node.attr(`props/${key}`, props.get(key)));
+      }
       node.attr('metadata', metadata);
       if (graph) {
         graph.addCell(node);
@@ -557,14 +561,18 @@ export namespace Shapes {
       } else {
         link = new joint.shapes.flo.Link();
       }
-      link.set('source', source);
-      link.set('target', target);
+      if (source) {
+        link.set('source', source);
+      }
+      if (target) {
+        link.set('target', target);
+      }
       link.set('type', joint.shapes.flo.LINK_TYPE);
       if (metadata) {
         link.attr('metadata', metadata);
       }
       if (props) {
-        link.attr('props', props);
+        Array.from(props.keys()).forEach(key => link.attr(`props/${key}`, props.get(key)));
       }
       if (graph) {
         graph.addCell(link);
