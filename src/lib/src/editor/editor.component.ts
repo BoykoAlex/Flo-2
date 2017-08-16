@@ -367,7 +367,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
       if (newSelection) {
         newSelection.highlight();
         if (this.editor && this.editor.createHandles) {
-          this.editor.createHandles(this.editorContext, this.createHandle, newSelection);
+          this.editor.createHandles(this.editorContext, (owner: dia.CellView, kind: string, action: () => void, location: dia.Point) => this.createHandle(owner, kind, action, location), newSelection);
         }
       }
       this._selection = newSelection;
@@ -409,7 +409,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
     this._readOnlyCanvas = value;
   }
 
-  _findMagnetByClass(view : dia.ElementView, className : string) : HTMLElement {
+  _findMagnetByClass(view : dia.CellView, className : string) : HTMLElement {
     if (className && className.startsWith('.')) {
         className = className.substr(1);
     }
@@ -618,11 +618,16 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
     // }
   }
 
-  handleDnDFromPalette(dnDEvent : Flo.DnDEvent) {
-    if (dnDEvent.type === 'drop') {
-      this.handleDropFromPalette(dnDEvent);
-    } else {
-      this.handleDragFromPalette(dnDEvent);
+  handleDnDFromPalette(dndEvent : Flo.DnDEvent) {
+    switch (dndEvent.type) {
+      case Flo.DnDEventType.DRAG:
+        this.handleDragFromPalette(dndEvent);
+        break;
+      case Flo.DnDEventType.DROP:
+        this.handleDropFromPalette(dndEvent);
+        break;
+      default:
+        break;
     }
   }
 
@@ -630,7 +635,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
     console.log('Dragging from palette');
     if (dnDEvent.view && !this.readOnlyCanvas) {
       let location = this.paper.snapToGrid({x: dnDEvent.event.clientX, y: dnDEvent.event.clientY});
-      this.handleNodeDragging(dnDEvent.view,  this.getTargetViewFromEvent(dnDEvent.event, location.x, location.y), location.x, location.y, 'palette');
+      this.handleNodeDragging(dnDEvent.view,  this.getTargetViewFromEvent(dnDEvent.event, location.x, location.y), location.x, location.y, Constants.PALETTE_CONTEXT);
     }
   }
 
@@ -675,7 +680,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
         let newNode = this.createNode(metadata, props, position);
         let newView = this.paper.findViewByModel(newNode);
 
-        this.handleNodeDragging(newView, targetElement, position.x, position.y, 'palette');
+        this.handleNodeDragging(newView, targetElement, position.x, position.y, Constants.PALETTE_CONTEXT);
         this.handleNodeDropping();
       }
     }
@@ -1037,6 +1042,17 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
 
     this.paper.on('dragging-node-over-canvas', (dndEvent : Flo.DnDEvent) => {
       console.log(`Canvas DnD type = ${dndEvent.type}`);
+      let location = this.paper.snapToGrid({x: dndEvent.event.clientX, y: dndEvent.event.clientY});
+      switch (dndEvent.type) {
+        case Flo.DnDEventType.DRAG:
+          this.handleNodeDragging(dndEvent.view, this.getTargetViewFromEvent(dndEvent.event, location.x, location.y), location.x, location.y, Constants.CANVAS_CONTEXT);
+          break;
+        case Flo.DnDEventType.DROP:
+          this.handleNodeDropping();
+          break;
+        default:
+          break;
+      }
     });
 
     // JointJS now no longer grabs focus if working in a paper element - crude...

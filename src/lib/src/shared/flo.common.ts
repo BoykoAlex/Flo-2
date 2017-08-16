@@ -2,8 +2,13 @@ import { dia } from 'jointjs';
 
 export namespace Flo {
 
+  export enum DnDEventType {
+    DRAG,
+    DROP
+  }
+
   export interface DnDEvent {
-    type : string;
+    type : DnDEventType;
     view : dia.CellView;
     event : MouseEvent;
   }
@@ -142,12 +147,13 @@ export namespace Flo {
   }
 
   export interface LinkEndDescriptor {
-    view : dia.ElementView;
+    view : dia.CellView;
     selector? : string;
   }
 
   export interface DnDDescriptor {
     context? : string;
+    range?: number;
     source? : LinkEndDescriptor;
     target? : LinkEndDescriptor;
   }
@@ -174,7 +180,7 @@ export namespace Flo {
     handleNodeDropping?(context : EditorContext, dragDescriptor : DnDDescriptor) : void;
     showDragFeedback?(context : EditorContext, dragDescriptor : DnDDescriptor) : void;
     hideDragFeedback?(context : EditorContext, dragDescriptor : DnDDescriptor) : void;
-    validate?(paper : dia.Graph) : Promise<Map<string, Array<Marker>>>;
+    validate?(graph : dia.Graph) : Promise<Map<string, Array<Marker>>>;
     preDelete?(context : EditorContext, deletedElement : dia.Cell) : void;
     setDefaultContent?(editorContext : EditorContext, data : Map<string, Map<string, ElementMetadata>>) : void;
   }

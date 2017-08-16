@@ -37,7 +37,7 @@ export class Renderer implements Flo.Renderer {
         size: {width: 10, height: 10},
         attrs: {
           'image': {
-            'xlink:href': HANDLE_ICON_MAP[kind]
+            'xlink:href': HANDLE_ICON_MAP.get(kind)
           }
         }
       });
@@ -48,7 +48,7 @@ export class Renderer implements Flo.Renderer {
         size: {width: 16, height: 16},
         attrs: {
           'image': {
-            'xlink:href': DECORATION_ICON_MAP[kind]
+            'xlink:href': DECORATION_ICON_MAP.get(kind)
           }
         }
       });

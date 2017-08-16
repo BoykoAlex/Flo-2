@@ -278,7 +278,7 @@ joint.shapes.flo.ElementView = joint.dia.ElementView.extend({
       this.options.interactive;
     if (interactive !== false && !this._linkView) {
       this.beingDragged = true;
-      this.paper.trigger('dragging-node-over-canvas', {type: 'drag', view: this, event: evt});
+      this.paper.trigger('dragging-node-over-canvas', {type: Flo.DnDEventType.DRAG, view: this, event: evt});
       this.model.attr('./opacity', 0.75);
     }
     joint.dia.ElementView.prototype.pointermove.apply(this, arguments);
@@ -295,7 +295,7 @@ joint.shapes.flo.ElementView = joint.dia.ElementView.extend({
         this.model.attr('./opacity', 1);
         //					this.model.removeAttr('./opacity');
       }
-      this.paper.trigger('dragging-node-over-canvas', {type: 'drop', view: this, event: evt});
+      this.paper.trigger('dragging-node-over-canvas', {type: Flo.DnDEventType.DROP, view: this, event: evt});
     }
     this.beingDragged = false;
     joint.dia.ElementView.prototype.pointerup.apply(this, arguments);
@@ -457,6 +457,10 @@ export namespace Constants {
   export const REMOVE_HANDLE_TYPE = REMOVE;
 
   export const ERROR_DECORATION_KIND = ERROR;
+
+  export const PALETTE_CONTEXT = 'palette';
+
+  export const CANVAS_CONTEXT = 'canvas';
 
 }
 

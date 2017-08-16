@@ -135,7 +135,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
         console.debug('pointerup');
         if (this.viewBeingDragged) {
           this.trigger({
-            type: 'drop',
+            type: Flo.DnDEventType.DROP,
             view: this.viewBeingDragged,
             event : evt
           });
@@ -500,7 +500,7 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
       } else {
         $('#palette-floater').offset({left:event.pageX+5,top:event.pageY+5});
         this.trigger({
-          type: 'drag',
+          type: Flo.DnDEventType.DRAG,
           view: this.viewBeingDragged,
           event: event
         });
