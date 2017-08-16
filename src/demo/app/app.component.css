@@ -143,3 +143,41 @@ textarea:input:focus {
 #flo-container {
   height: 800px;
 }
+
+
+/* Modules DnD shape animation */
+
+@keyframes flash-stroke-width {
+  0%    { stroke-width: 1; }
+  50%   { stroke-width: 4; }
+  100%  { stroke-width: 1; }
+}
+
+.dnd-source-feedback.joint-element .box {
+  animation: flash-stroke-width 2s linear infinite;
+}
+.dnd-target-feedback.joint-element .box {
+  animation: flash-stroke-width 2s linear infinite;
+}
+
+/* Ports DnD animation */
+.dnd-source-feedback.input-port {
+  animation: flash-stroke-width 2s linear infinite;
+}
+.dnd-source-feedback.output-port {
+  animation: flash-stroke-width 2s linear infinite;
+}
+.dnd-target-feedback.input-port {
+  animation: flash-stroke-width 2s linear infinite;
+}
+.dnd-target-feedback.output-port {
+  animation: flash-stroke-width 2s linear infinite;
+}
+
+/* Links DnD feedback animation */
+.dnd-source-feedback .connection {
+  animation: flash-stroke-width 2s linear infinite;
+}
+.dnd-target-feedback .connection {
+  animation: flash-stroke-width 2s linear infinite;
+}

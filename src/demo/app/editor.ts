@@ -88,7 +88,7 @@ export class Editor implements Flo.Editor {
 
     calculateDragDescriptor(context : Flo.EditorContext, draggedView : dia.CellView, targetUnderMouse : dia.CellView, point : dia.Point, sourceComponent : string) : Flo.DnDDescriptor {
       let source = draggedView.model;
-      let sourceGroup = source.attr('metadta/group');
+      let sourceGroup = source.attr('metadata/group');
 
       // Find closest port
       let range = 30;
@@ -113,7 +113,7 @@ export class Editor implements Flo.Editor {
             let targetMaxOutgoingLinks = targetGroup === 'sink' ? 0 : 1;
             let targetHasIncomingPort = targetGroup !== 'source';
             let targetHasOutgoingPort = targetGroup !== 'sink';
-            view.$('[magnet]').each(function(index, magnet) {
+            view.$('[magnet]').each((index : number, magnet : HTMLElement) => {
               let type = magnet.getAttribute('type');
               if ((type === 'input' && targetHasIncomingPort && hasOutgoingPort) || (type === 'output' && targetHasOutgoingPort && hasIncomingPort)) {
                 let bbox = joint.V(magnet).bbox(false, paper.viewport); // jshint ignore:line
