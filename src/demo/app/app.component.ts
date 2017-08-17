@@ -16,6 +16,8 @@ export class AppComponent {
   metamodel : Flo.Metamodel;
   renderer : Flo.Renderer;
   editor : Flo.Editor;
+  dsl : string;
+  dslEditor = false;
 
   private editorContext : Flo.EditorContext;
 
@@ -25,9 +27,11 @@ export class AppComponent {
     this.metamodel = new Metamodel();
     this.renderer = new Renderer();
     this.editor = new Editor();
+    this.dsl = '';
   }
 
-  printSomething() {
-    console.log("Hanlder Invoked!!!");
+  updateDsl(event : any) {
+    console.log(`Update DSL with ${event.target.value} ` );
+    this.dsl = event.target.value;
   }
 }

@@ -76,10 +76,6 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
   @Output()
   floApi = new EventEmitter<Flo.EditorContext>();
 
-  private definition : Flo.Definition = {
-    text: ''
-  };
-
   /**
    * Joint JS Graph object representing the Graph model
    */
@@ -126,6 +122,13 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
 
   private _disposables = new CompositeDisposable();
 
+  /* DSL Fields */
+
+  private _dslText : string = '';
+
+  @Output()
+  private dslChanged = new EventEmitter<string>();
+
   constructor(private element: ElementRef) {
     let self = this;
     this.editorContext = new (class DefaultRunnableContext implements Flo.EditorContext {
@@ -162,8 +165,8 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
         return self.readOnlyCanvas;
       }
 
-      scheduleGraphUpdate() {
-        self.textToGraphEventEmitter.emit();
+      setDsl(dsl : string) {
+        self.dsl = dsl;
       }
 
       updateGraph() : void {
@@ -826,6 +829,18 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
+  @Input()
+  set dsl(dslText : string) {
+    if (this._dslText !== dslText) {
+      this._dslText = dslText;
+      this.textToGraphEventEmitter.emit();
+    }
+  }
+
+  get dsl() : string {
+    return this._dslText;
+  }
+
   /**
    * Ask the server to parse the supplied text into a JSON graph of nodes and links,
    * then update the view based on that new information.
@@ -833,15 +848,20 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
    * @param {string} definition A flow definition (could be any format the server 'parse' endpoint understands)
    */
   updateGraphRepresentation() {
-    console.debug(`Updating graph to represent \'${this.definition.text}\'`);
+    console.debug(`Updating graph to represent '${this._dslText}'`);
     if (this.metamodel && this.metamodel.textToGraph) {
-      this.metamodel.textToGraph(this.editorContext, this.definition);
+      this.metamodel.textToGraph(this.editorContext, this._dslText);
     }
   }
 
   updateTextRepresentation() : void {
     if (this.metamodel && this.metamodel.graphToText) {
-      return this.metamodel.graphToText(this.editorContext, this.definition);
+      this.metamodel.graphToText(this.editorContext).then(text => {
+        if (this._dslText != text) {
+          this._dslText = text;
+          this.dslChanged.emit(text);
+        }
+      });
     }
   }
 
@@ -1065,7 +1085,9 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
     });
 
     // JointJS now no longer grabs focus if working in a paper element - crude...
-    $('#flow-view', this.element.nativeElement).on('mousedown', () => $('#palette-filter-textfield', this.element.nativeElement).focus());
+    $('#flow-view', this.element.nativeElement).on('mousedown', () => {
+      $('#palette-filter-textfield', this.element.nativeElement).focus();
+    });
   }
 
   initPaper() : void {

@@ -1,5 +1,6 @@
 import { Flo } from 'spring-flo';
 const { convertGraphToText } = require('./graph-to-text');
+const { convertTextToGraph } = require('./text-to-graph');
 
 const metamodelData: Array<RawMetadata> = [{
   name: 'http', group: 'source', description: 'Receive HTTP input',
@@ -79,14 +80,18 @@ export class Metamodel implements Flo.Metamodel {
     this.rawData = metamodelData;
   }
 
-  textToGraph(flo: Flo.EditorContext, definition: Flo.Definition) {
+  textToGraph(flo: Flo.EditorContext, dsl : string) {
     console.log('Text -> Graph');
+    this.load().then(metamodel => {
+      convertTextToGraph(flo, metamodel, dsl);
+      flo.performLayout();
+      flo.fitToPage();
+    })
   }
 
-  graphToText(flo: Flo.EditorContext, definition: Flo.Definition) {
+  graphToText(flo: Flo.EditorContext) {
     console.log('Graph -> Text');
-    definition.text = convertGraphToText(flo.getGraph());
-    console.log(`Text = ${definition.text}`);
+    return new Promise((resolve) => resolve(convertGraphToText(flo.getGraph())));
   }
 
   load(): Promise < Map < string, Map < string, Flo.ElementMetadata >>> {

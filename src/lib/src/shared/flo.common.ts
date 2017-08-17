@@ -33,10 +33,10 @@ export namespace Flo {
   export interface ElementMetadata {
     readonly name : string;
     readonly group : string;
-    description() : Promise<string>;
+    description?() : Promise<string>;
     get(property : String) : Promise<PropertyMetadata>;
-
     readonly metadata? : ExtraMetadata;
+    readonly [propName : string] : any;
   }
 
   export interface ViewerDescriptor {
@@ -63,8 +63,8 @@ export namespace Flo {
   }
 
   export interface Metamodel {
-    textToGraph(flo : EditorContext, definition: Definition) : void;
-    graphToText(flo : EditorContext, definition: Definition) : void;
+    textToGraph(flo : EditorContext, dsl : string) : void;
+    graphToText(flo : EditorContext) : Promise<string>;
     load() : Promise<Map<string, Map<string, ElementMetadata>>>;
     groups() : Array<string>;
 
@@ -129,7 +129,7 @@ export namespace Flo {
     selection : dia.CellView;
     graphToTextSync : boolean;
     noPalette : boolean;
-    scheduleGraphUpdate() : void;
+    setDsl(dsl : string) : void;
     updateGraph() : void;
     updateText() : void;
     performLayout() : Promise<void>;
@@ -200,6 +200,25 @@ export namespace Flo {
 
   export function findMagnetByPort(view : dia.CellView, port : string) : HTMLElement {
     return view.$('[magnet]').toArray().find(magnet => magnet.getAttribute('port') === port);
+  }
+
+  /**
+   * Return the metadata for a particular palette entry in a particular group.
+   * @param {String} name - name of the palette entry
+   * @param {string} group - group in which the palette entry should exist (e.g. sinks)
+   * @return {{name:string,group:string,unresolved:Boolean}}
+   */
+  export function getMetadata(metamodel : Map<string, Map<string, ElementMetadata>>, name : string, group : string) : ElementMetadata {
+    if (name && group && metamodel.get(group) && metamodel.get(group).get(name)) {
+      return metamodel.get(group).get(name);
+    } else {
+      return {
+        name: name,
+        group: group,
+        unresolved: true,
+        get: (property : String) => new Promise(resolve => resolve())
+      };
+    }
   }
 
 }
