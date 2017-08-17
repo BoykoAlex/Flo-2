@@ -34,7 +34,7 @@
       <div class="flow-definition-container">
         <textarea *ngIf="dslEditor" dsl-editor="true" id="flow-definition" class="flow-definition"></textarea>
         <textarea *ngIf="!dslEditor" id="flow-definition" class="flow-definition" placeholder="Enter stream definition..."
-                [value]="dsl" (keyup)="updateDsl($event)" (blur)="editorContext.graphToTextSync=true" (focus)="editorContext.graphToTextSync=false"></textarea>
+                [value]="dsl" (keyup)="dsl=$event.target.value" (blur)="editorContext.graphToTextSync=true" (focus)="editorContext.graphToTextSync=false"></textarea>
       </div>
   </flo-editor>
 </div>

@@ -30,8 +30,4 @@ export class AppComponent {
     this.dsl = '';
   }
 
-  updateDsl(event : any) {
-    console.log(`Update DSL with ${event.target.value} ` );
-    this.dsl = event.target.value;
-  }
 }
