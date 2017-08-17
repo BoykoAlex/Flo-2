@@ -138,6 +138,6 @@ export class ResizerDirective implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this._subscriptions.dispoase();
+    this._subscriptions.dispose();
   }
 } 

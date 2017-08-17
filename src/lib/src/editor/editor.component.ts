@@ -1,4 +1,5 @@
-import { Component, Input, ElementRef, EventEmitter, OnInit, OnDestroy, ViewEncapsulation, OnChanges, SimpleChanges} from '@angular/core';
+import { Component, Input, Output, ElementRef, EventEmitter, OnInit, OnDestroy, ViewEncapsulation, OnChanges, SimpleChanges} from '@angular/core';
+import { NgIf } from '@angular/common';
 import { NgModel } from '@angular/forms';
 import 'rxjs/add/operator/debounceTime';
 import { dia } from 'jointjs';
@@ -72,6 +73,9 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
   @Input()
   private paperPadding : number = 0;
 
+  @Output()
+  floApi = new EventEmitter<Flo.EditorContext>();
+
   private definition : Flo.Definition = {
     text: ''
   };
@@ -132,6 +136,14 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
 
       get zoomPercent() : number {
         return self.zoomPercent;
+      }
+
+      set noPalette(noPalette : boolean) {
+        self.noPalette = noPalette;
+      }
+
+      get noPalette() : boolean {
+        return self.noPalette;
       }
 
       set gridSize(gridSize : number) {
@@ -266,6 +278,8 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
      * Executed via timeout to let angular render the DOM first and elements to have the right width and height
      */
     window.setTimeout(this._resizeHandler);
+
+    this.floApi.emit(this.editorContext);
 
   }
 

@@ -7,7 +7,30 @@
   Spring Flo Sample
 </div>
 <div id="flo-container">
-  <flo-editor [metamodel]="metamodel" [renderer]="renderer" [editor]="editor" [paletteSize]="paletteSize">
+  <flo-editor (floApi)="editorContext = $event" [metamodel]="metamodel" [renderer]="renderer" [editor]="editor" [paletteSize]="paletteSize">
+      <div id="controls" class="controls">
+        <button class="button" id="clearGraph" (click)="editorContext.clearGraph()">Create New Flow</button>
+        <!-- let's use the 'x' control on the nodes themselves when they are selected
+                  <button class="button" id="deleteSelectedNode" ng-click="flo.deleteSelectedNode()">Delete Selected Node</button>
+                   -->
+        <button class="button" id="performLayout" (click)="editorContext.performLayout()">Reset Layout</button>
+        <button class="button" id="sync" (click)="editorContext.graphToTextSync = !editorContext.graphToTextSync" [ngClass]="{on:editorContext.graphToTextSync}">Synchronize</button>
+        <button class="button" id="readOnly" (click)="editorContext.readOnlyCanvas = !editorContext.readOnlyCanvas" [ngClass]="{on:editorContext.readOnlyCanvas}">Read-Only</button>
+        <button class="button" id="noPalette" (click)="editorContext.noPalette = !editorContext.noPalette" [ngClass]="{on:!editorContext.noPalette}">Palette</button>
+        <!--<button class="button" id="editor" (click)="editor = !editor" ng-lcass="{on:editor}">{{editor ? 'TextArea' : 'Editor'}}</button>-->
+        <span class="button">
+          <label>Zoom: </label>
+          <input id="zoomInput" type="text" [(ngModel)]="editorContext.zoomPercent" size="3">
+          <label>%</label>
+          <input type="range" [(ngModel)]="editorContext.zoomPercent" [step]="editorContext.getZoomStep()" [max]="editorContext.getMaxZoom()" [min]="editorContext.getMinZoom()" data-type="range" name="range" class="range">
+        </span>
+        <span class="button">
+				  <label>Grid Size: </label>
+			    <input id="gridSizeInput" type="text" [(ngModel)]="editorContext.gridSize" size="2">
+			    <label>pixels</label>
+			    <input type="range" [(ngModel)]="editorContext.gridSize" step="1" max="50" min="1" data-type="range" name="range" class="range">
+				</span>
+      </div>
   </flo-editor>
 </div>
 

@@ -1,10 +1,11 @@
+<ng-content></ng-content>
 <div id="flow-view" class="flow-view" style="position:relative; height:100%">
   <div id="canvas" class="canvas" style="position:relative; display: block; width: 100%; height: 100%;">
-    <div id="palette-container" class="palette-container" ng-if="!flo.noPalette" style="overflow:hidden;">
+    <div *ngIf="!noPalette" id="palette-container" class="palette-container" style="overflow:hidden;">
       <flo-palette [metamodel]="metamodel" [renderer]="renderer" [paletteSize]="paletteSize" (onPaletteEntryDrop)="handleDnDFromPalette($event)"></flo-palette>
     </div>
 
-    <div id="sidebar-resizer"
+    <div id="sidebar-resizer" *ngIf="!noPalette"
       resizer
       [splitSize]="paletteSize"
       (sizeChange)="paletteSize = $event"
@@ -38,6 +39,4 @@
       </span>
     </div>
   </div>
-  <div id="hook"></div>
-  <div id="dialogs"></div>
 </div>

@@ -1,4 +1,5 @@
 import { Component, ViewEncapsulation } from '@angular/core';
+import { NgModel } from '@angular/forms';
 import { Flo } from 'spring-flo';
 const { Metamodel } = require('./metamodel');
 const { Renderer } = require('./renderer');
@@ -16,11 +17,17 @@ export class AppComponent {
   renderer : Flo.Renderer;
   editor : Flo.Editor;
 
+  private editorContext : Flo.EditorContext;
+
   paletteSize = 170;
 
   constructor() {
     this.metamodel = new Metamodel();
     this.renderer = new Renderer();
     this.editor = new Editor();
+  }
+
+  printSomething() {
+    console.log("Hanlder Invoked!!!");
   }
 }

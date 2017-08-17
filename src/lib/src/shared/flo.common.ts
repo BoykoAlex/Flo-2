@@ -128,6 +128,7 @@ export namespace Flo {
     readOnlyCanvas : boolean;
     selection : dia.CellView;
     graphToTextSync : boolean;
+    noPalette : boolean;
     scheduleGraphUpdate() : void;
     updateGraph() : void;
     updateText() : void;
