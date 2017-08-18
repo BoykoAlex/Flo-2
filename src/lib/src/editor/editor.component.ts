@@ -127,7 +127,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
   private _dslText : string = '';
 
   @Output()
-  private dslChanged = new EventEmitter<string>();
+  private dslChange = new EventEmitter<string>();
 
   constructor(private element: ElementRef) {
     let self = this;
@@ -859,7 +859,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
       this.metamodel.graphToText(this.editorContext).then(text => {
         if (this._dslText != text) {
           this._dslText = text;
-          this.dslChanged.emit(text);
+          this.dslChange.emit(text);
         }
       });
     }
@@ -869,14 +869,14 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
     this.metamodel.load().then(data => {
       this.updateGraphRepresentation();
 
-      let textSyncSubscription = this.graphToTextEventEmitter.debounceTime(300).subscribe(() => {
+      let textSyncSubscription = this.graphToTextEventEmitter.debounceTime(100).subscribe(() => {
         if (this._graphToTextSyncEnabled) {
           this.updateTextRepresentation();
         }
       });
       this._disposables.add(Disposable.create(() => textSyncSubscription.unsubscribe()));
 
-      let validationSubscription = this.validationEventEmitter.debounceTime(300).subscribe(() => this.validateGraph());
+      let validationSubscription = this.validationEventEmitter.debounceTime(100).subscribe(() => this.validateGraph());
       this._disposables.add(Disposable.create(() => validationSubscription.unsubscribe()));
 
       let graphSyncSubscription = this.textToGraphEventEmitter.debounceTime(300).subscribe(() => this.updateGraphRepresentation());

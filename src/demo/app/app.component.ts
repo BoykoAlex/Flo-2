@@ -30,4 +30,7 @@ export class AppComponent {
     this.dsl = '';
   }
 
+  arrangeAll() {
+    this.editorContext.performLayout().then(() => this.editorContext.fitToPage());
+  }
 }

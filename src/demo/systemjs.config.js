@@ -31,7 +31,8 @@
       'backbone': 'npm:backbone',
       'lodash': 'npm:lodash',
       'underscore': 'npm:lodash',
-      'dagre': 'npm:dagre'
+      'dagre': 'npm:dagre',
+      'codemirror': 'npm:codemirror',
     },
     // packages tells the System loader how to load when no filename and/or no extension
     packages: {
@@ -63,6 +64,9 @@
       },
       dagre: {
         main: './dist/dagre.js'
+      },
+      codemirror: {
+        main: './lib/codemirror.js'
       },
       'spring-flo': {
         main: 'index.js',

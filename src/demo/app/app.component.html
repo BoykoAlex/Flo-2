@@ -7,13 +7,13 @@
   Spring Flo Sample
 </div>
 <div id="flo-container">
-  <flo-editor (floApi)="editorContext = $event" [metamodel]="metamodel" [renderer]="renderer" [editor]="editor" [paletteSize]="paletteSize" [dsl]="dsl" (dslChanged)="dsl=$event">
+  <flo-editor (floApi)="editorContext = $event" [metamodel]="metamodel" [renderer]="renderer" [editor]="editor" [paletteSize]="paletteSize" [(dsl)]="dsl" [paperPadding]="20">
       <div id="controls" class="controls">
         <button class="button" id="clearGraph" (click)="editorContext.clearGraph()">Create New Flow</button>
         <!-- let's use the 'x' control on the nodes themselves when they are selected
                   <button class="button" id="deleteSelectedNode" ng-click="flo.deleteSelectedNode()">Delete Selected Node</button>
                    -->
-        <button class="button" id="performLayout" (click)="editorContext.performLayout()">Reset Layout</button>
+        <button class="button" id="performLayout" (click)="arrangeAll()">Reset Layout</button>
         <button class="button" id="sync" (click)="editorContext.graphToTextSync = !editorContext.graphToTextSync" [ngClass]="{on:editorContext.graphToTextSync}">Synchronize</button>
         <button class="button" id="readOnly" (click)="editorContext.readOnlyCanvas = !editorContext.readOnlyCanvas" [ngClass]="{on:editorContext.readOnlyCanvas}">Read-Only</button>
         <button class="button" id="noPalette" (click)="editorContext.noPalette = !editorContext.noPalette" [ngClass]="{on:!editorContext.noPalette}">Palette</button>
@@ -32,7 +32,7 @@
 				</span>
       </div>
       <div class="flow-definition-container">
-        <textarea *ngIf="dslEditor" dsl-editor="true" id="flow-definition" class="flow-definition"></textarea>
+        <dsl-editor *ngIf="dslEditor" [(dsl)]="dsl" line-numbers="true" line-wrapping="true" (blur)="editorContext.graphToTextSync=true" (focus)="editorContext.graphToTextSync=false" placeholder="Enter stream definition..."></dsl-editor>
         <textarea *ngIf="!dslEditor" id="flow-definition" class="flow-definition" placeholder="Enter stream definition..."
                 [value]="dsl" (keyup)="dsl=$event.target.value" (blur)="editorContext.graphToTextSync=true" (focus)="editorContext.graphToTextSync=false"></textarea>
       </div>
