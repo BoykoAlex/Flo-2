@@ -1,6 +1,7 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { NgModel } from '@angular/forms';
 import { Flo } from 'spring-flo';
+import { BsModalService } from 'ngx-bootstrap';
 const { Metamodel } = require('./metamodel');
 const { Renderer } = require('./renderer');
 const { Editor } = require('./editor');
@@ -23,10 +24,10 @@ export class AppComponent {
 
   paletteSize = 170;
 
-  constructor() {
+  constructor(private modelService : BsModalService) {
     this.metamodel = new Metamodel();
     this.renderer = new Renderer();
-    this.editor = new Editor();
+    this.editor = new Editor(modelService);
     this.dsl = '';
   }
 

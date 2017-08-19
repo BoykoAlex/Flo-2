@@ -21,7 +21,8 @@ const joint = require('jointjs');
 const dagre = require('dagre');
 
 const HANDLE_ICON_MAP = new Map<string, string>()
-  .set(Constants.REMOVE_HANDLE_TYPE, 'icons/delete.svg');
+  .set(Constants.REMOVE_HANDLE_TYPE, 'icons/delete.svg')
+  .set(Constants.PROPERTIES_HANDLE_TYPE, 'icons/cog.svg');
 
 const DECORATION_ICON_MAP = new Map<string, string>()
   .set(Constants.ERROR_DECORATION_KIND, 'icons/error.svg');

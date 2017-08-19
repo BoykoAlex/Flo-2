@@ -85,6 +85,11 @@ pre {
   text-align:right;
 }
 
+.button input[type=range] {
+  display: inline;
+  width: 100px;
+}
+
 button.on {
   background-color: #5fa134;
 }

@@ -1,4 +1,6 @@
 import { dia } from 'jointjs';
+import { ValidatorFn, AsyncValidatorFn } from '@angular/forms'
+const _ = require('lodash');
 
 export namespace Flo {
 
@@ -35,6 +37,7 @@ export namespace Flo {
     readonly group : string;
     description?() : Promise<string>;
     get(property : String) : Promise<PropertyMetadata>;
+    properties() : Promise<Array<PropertyMetadata>>;
     readonly metadata? : ExtraMetadata;
     readonly [propName : string] : any;
   }
@@ -216,7 +219,8 @@ export namespace Flo {
         name: name,
         group: group,
         unresolved: true,
-        get: (property : String) => new Promise(resolve => resolve())
+        get: (property : String) => new Promise(resolve => resolve()),
+        properties: () => Promise.resolve([])
       };
     }
   }

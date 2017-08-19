@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { Flo, Constants } from 'spring-flo';
+import { Flo, Constants, Properties } from 'spring-flo';
 import { dia } from 'jointjs';
-
+import { BsModalService } from 'ngx-bootstrap';
+const { PropertiesDialogComponent } = require('./properties.dialog.component');
 const joint = require('jointjs');
 
 /**
@@ -25,12 +26,39 @@ const joint = require('jointjs');
  */
 export class Editor implements Flo.Editor {
 
+    constructor(private modelService : BsModalService) {}
+
     createHandles(context : Flo.EditorContext, createHandle : (owner : dia.CellView, kind : string, action : () => void, location : dia.Point) => void, owner : dia.CellView) {
       if (owner.model instanceof joint.dia.Element) {
         let bbox : any = (<dia.Element> owner.model).getBBox();
-        let pt = bbox.origin().offset(bbox.width + 3, bbox.height + 3);
-        createHandle(owner, Constants.REMOVE_HANDLE_TYPE, context.deleteSelectedNode, pt);
+
+        // Remove handle
+        createHandle(owner, Constants.REMOVE_HANDLE_TYPE, context.deleteSelectedNode, bbox.origin().offset(bbox.width + 3, bbox.height + 3));
+
+        // Properties handle
+        if (!owner.model.attr('metadata/unresolved')) {
+          createHandle(owner, Constants.PROPERTIES_HANDLE_TYPE, () => this.openPropertiesDialog(owner.model), bbox.origin().offset(-14, bbox.height + 3));
+        }
       }
+    }
+
+    openPropertiesDialog(cell : dia.Cell) {
+      console.log('Props view invoked!');
+      let bsModalRef = this.modelService.show(PropertiesDialogComponent);
+      let metadata : Flo.ElementMetadata = cell.attr('metadata');
+      bsModalRef.content.title = `Properties for ${metadata.name.toUpperCase()}`;
+      // metadata.properties().then((allProps : Array<Flo.PropertyMetadata>) => {
+      //   let models = allProps.map(p => new Flo.PropertiesForm.GenericControlModel({
+      //     id: p.id,
+      //     name: p.name,
+      //     defaultValue: p.defaultValue,
+      //     attr: `props/${p.name}`,
+      //     value: cell.attr(`props/${p.name}`),
+      //     description: p.description
+      //   }, Flo.PropertiesForm.InputType.TEXT));
+      //   bsModalRef.content.addControlModels(models);
+      // });
+      bsModalRef.content.propertiesGroupModel = new Properties.PropertiesGroupModel(cell);
     }
 
     validatePort(context : Flo.EditorContext, view : dia.ElementView, magnet : SVGElement) {

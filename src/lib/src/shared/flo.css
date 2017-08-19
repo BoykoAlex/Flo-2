@@ -308,6 +308,7 @@ flo-view {
 .zoom-canvas-input {
   text-align: right;
   font-weight:bold;
+  color: black;
 }
 
 .zoom-canvas-label {

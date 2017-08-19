@@ -456,11 +456,14 @@ export namespace Constants {
 
   export const REMOVE_HANDLE_TYPE = REMOVE;
 
+  export const PROPERTIES_HANDLE_TYPE = 'properties';
+
   export const ERROR_DECORATION_KIND = ERROR;
 
   export const PALETTE_CONTEXT = 'palette';
 
   export const CANVAS_CONTEXT = 'canvas';
+
 
 }
 
