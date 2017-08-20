@@ -1,9 +1,9 @@
 import { dia } from '@types/jointjs';
 import { Flo } from './flo.common';
-import ElementCreationParams = Shapes.ElementCreationParams;
 import EditorDescriptor = Flo.ViewerDescriptor;
-const joint = require('jointjs');
-const _ = require('underscore');
+import * as _ from 'lodash';
+import * as _joint from 'jointjs';
+const joint : any = _joint;
 
 const isChrome : boolean = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 const isFF : boolean = navigator.userAgent.indexOf("Firefox") > 0;
@@ -38,7 +38,7 @@ joint.util.filter.redscale = (args : Shapes.FilterOptions) => {
 
   let amount = _.isFinite(args.amount) ? args.amount : 1;
 
-  return _.template('<filter><feColorMatrix type="matrix" values="${a} ${b} ${c} 0 ${d} ${e} ${f} ${g} 0 0 ${h} ${i} ${k} 0 0 0 0 0 1 0"/></filter>', {
+  return _.template('<filter><feColorMatrix type="matrix" values="${a} ${b} ${c} 0 ${d} ${e} ${f} ${g} 0 0 ${h} ${i} ${k} 0 0 0 0 0 1 0"/></filter>', <any>{
     a: 1 - 0.96 * amount,
     b: 0.95 * amount,
     c: 0.01 * amount,
@@ -56,7 +56,7 @@ joint.util.filter.orangescale = (args : Shapes.FilterOptions) => {
 
   let amount = _.isFinite(args.amount) ? args.amount : 1;
 
-  return _.template('<filter><feColorMatrix type="matrix" values="${a} ${b} ${c} 0 ${d} ${e} ${f} ${g} 0 ${h} ${i} ${k} ${l} 0 0 0 0 0 1 0"/></filter>', {
+  return _.template('<filter><feColorMatrix type="matrix" values="${a} ${b} ${c} 0 ${d} ${e} ${f} ${g} 0 ${h} ${i} ${k} ${l} 0 0 0 0 0 1 0"/></filter>', <any>{
     a: 1.0 + 0.5 * amount,
     b: 1.4 * amount,
     c: 0.2 * amount,

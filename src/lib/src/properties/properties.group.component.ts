@@ -2,8 +2,6 @@ import { Component, Input, Output, EventEmitter, OnInit, ViewEncapsulation } fro
 import { FormGroup, FormControl } from '@angular/forms';
 import { Properties } from './../shared/flo.properties';
 
-
-
 @Component({
   selector: 'properties-group',
   templateUrl: './properties.group.component.html',

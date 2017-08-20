@@ -1,6 +1,4 @@
 import { dia } from 'jointjs';
-import { ValidatorFn, AsyncValidatorFn } from '@angular/forms'
-const _ = require('lodash');
 
 export namespace Flo {
 

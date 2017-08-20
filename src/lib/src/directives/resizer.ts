@@ -3,9 +3,10 @@ import {DOCUMENT} from '@angular/platform-browser'
 import {Observable}  from 'rxjs/Observable';
 import 'rxjs/add/operator/sampleTime';
 import 'rxjs/add/observable/fromEvent';
-
-const { CompositeDisposable, Disposable } = require('rx');
-const $ = require('jquery');
+import 'rxjs/Rx';
+import { CompositeDisposable, Disposable } from 'ts-disposables';
+import * as _$ from 'jquery';
+const $ : any = _$;
 
 @Directive({
   selector: '[resizer]',
@@ -123,11 +124,11 @@ export class ResizerDirective implements OnInit, OnDestroy {
     // Need to set left and right elements width and fire events on init when DOM is built 
     this.splitSize = this._splitSize;
 
-    let subscription1 = Observable.fromEvent($(this.document), 'mousemove')
+    let subscription1 = Observable.fromEvent($(this.document).get(0), 'mousemove')
       .sampleTime(300)
       .subscribe(this.mouseMoveHandler);
     this._subscriptions.add(Disposable.create(() => subscription1.unsubscribe()));
-    let subscription2 = Observable.fromEvent($(this.document), 'mouseup')
+    let subscription2 = Observable.fromEvent($(this.document).get(0), 'mouseup')
       .subscribe(e => {
         if (this.dragInProgress) {
           this.mousemove(e);
@@ -135,6 +136,7 @@ export class ResizerDirective implements OnInit, OnDestroy {
         }
       });
     this._subscriptions.add(Disposable.create(() => subscription2.unsubscribe()));
+
   }
 
   ngOnDestroy() {

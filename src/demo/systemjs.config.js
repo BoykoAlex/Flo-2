@@ -35,6 +35,7 @@
       'codemirror': 'npm:codemirror',
       'moment': 'npm:moment/moment.js',
       'ngx-bootstrap': 'npm:ngx-bootstrap/bundles/ngx-bootstrap.umd.js',
+      'ts-disposables': 'npm:ts-disposables'
     },
     // packages tells the System loader how to load when no filename and/or no extension
     packages: {
@@ -51,6 +52,10 @@
       },
       rxjs: {
         defaultExtension: 'js'
+      },
+      'ts-disposables': {
+        defaultExtension: 'js',
+        main: './dist/index.js'
       },
       jointjs: {
         main: './dist/joint.js'

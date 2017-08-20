@@ -5,9 +5,10 @@ import { dia } from 'jointjs';
 import { Flo } from './../shared/flo.common';
 import { Shapes } from './../shared/shapes';
 import { DOCUMENT } from '@angular/platform-browser'
-
-const joint = require('jointjs');
-const $ = require('jquery');
+import * as _$ from 'jquery';
+import * as _joint from 'jointjs';
+const joint : any = _joint;
+const $ : any = _$;
 
 const DEBOUNCE_TIME : number = 300;
 
@@ -121,9 +122,10 @@ export class Palette implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit() {
+    let element = $('#palette-paper', this.element.nativeElement);
     // Create the paper for the palette using the specified element view
     this.palette = new joint.dia.Paper({
-      el: $('#palette-paper', this.element.nativeElement),
+      el: element,
       gridSize:1,
       model: this.paletteGraph,
       height: $(this.element.nativeElement.parentNode).height(),

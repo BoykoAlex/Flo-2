@@ -2,7 +2,6 @@ import { dia } from 'jointjs';
 import { ValidatorFn, AsyncValidatorFn } from '@angular/forms'
 import { Flo } from './../shared/flo.common';
 import { Subject } from 'rxjs/Subject'
-const _ = require('lodash');
 
 export namespace Properties {
 

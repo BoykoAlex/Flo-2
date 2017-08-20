@@ -1,15 +1,15 @@
 import { Component, Input, Output, ElementRef, EventEmitter, OnInit, OnDestroy, ViewEncapsulation, OnChanges, SimpleChanges} from '@angular/core';
-import { NgIf } from '@angular/common';
-import { NgModel } from '@angular/forms';
 import 'rxjs/add/operator/debounceTime';
 import { dia } from 'jointjs';
 import { Flo } from './../shared/flo.common';
 import { Shapes, Constants } from '../shared/shapes';
 import { Utils } from './editor.utils';
-const joint = require('jointjs');
-const $ = require('jquery');
-const _ = require('lodash');
-const { CompositeDisposable, Disposable } = require('rx');
+import { CompositeDisposable, Disposable } from 'ts-disposables';
+import * as _$ from 'jquery';
+import * as _ from 'lodash';
+import * as _joint from 'jointjs';
+const joint : any = _joint;
+const $ : any = _$;
 
 
 export interface VisibilityState {
@@ -679,7 +679,7 @@ export class EditorComponent implements OnInit, OnDestroy, OnChanges {
   handleDropFromPalette(event : Flo.DnDEvent) {
     let cellview = event.view;
     let evt = event.event;
-    if (this.paper.el === evt.target || $.contains(this.paper.el, evt.target)) {
+    if (this.paper.el === evt.target || $.contains(this.paper.el, <any>evt.target)) {
       if (this.readOnlyCanvas) {
         this.setDragDescriptor(null);
       } else {

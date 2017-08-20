@@ -1,14 +1,15 @@
 import { Component, Input, Output, ElementRef, EventEmitter, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import 'rxjs/add/operator/debounceTime';
-const $ = require('jquery');
-const _ = require('lodash');
-const CodeMirror = require('codemirror');
+import * as _ from 'lodash';
+import * as CodeMirror from 'codemirror';
+import * as _$ from 'jquery';
+const $ : any = _$;
 
-require('./../../../../node_modules/codemirror/addon/lint/lint');
-require('./../../../../node_modules/codemirror/addon/hint/show-hint');
-require('./../../../../node_modules/codemirror/addon/display/placeholder');
-require('./../../../../node_modules/codemirror/addon/scroll/annotatescrollbar');
-require('./../../../../node_modules/codemirror/addon/scroll/simplescrollbars');
+import './../../../../node_modules/codemirror/addon/lint/lint';
+import './../../../../node_modules/codemirror/addon/hint/show-hint';
+import './../../../../node_modules/codemirror/addon/display/placeholder';
+import './../../../../node_modules/codemirror/addon/scroll/annotatescrollbar';
+import './../../../../node_modules/codemirror/addon/scroll/simplescrollbars';
 
 @Component({
   selector: 'dsl-editor',
@@ -107,7 +108,7 @@ export class DslEditorComponent implements OnInit, OnDestroy {
       (<any>options).hintOptions = this._hint;
     }
 
-    this.doc = CodeMirror.fromTextArea($('#dsl-editor-host', this.element.nativeElement)[0], options);
+    this.doc = CodeMirror.fromTextArea(<HTMLTextAreaElement>$('#dsl-editor-host', this.element.nativeElement)[0], options);
 
     if (this.placeholder) {
       this.doc.setOption('placeholder', this.placeholder);
