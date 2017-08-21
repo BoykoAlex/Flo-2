@@ -34,7 +34,7 @@
     "integration:aot": "cd integration && npm run e2e:aot",
     "lint": "tslint ./src/**/*.ts -t verbose",
     "release": "standard-version",
-    "postinstall": "npm run build"
+    "postinstall": "npm install --only=dev && npm run build"
   },
   "dependencies": {
     "@angular/core": "^4.2.4",
