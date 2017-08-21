@@ -10,7 +10,7 @@ import { PropertiesGroupComponent } from './properties/properties.group.componen
 import { DynamicFormPropertyComponent } from './properties/df.property.component';
 
 @NgModule({
-  imports: [ FormsModule, BrowserModule, ReactiveFormsModule, NgModule ],
+  imports: [ FormsModule, BrowserModule, ReactiveFormsModule ],
   declarations: [ Palette, EditorComponent, ResizerDirective, DslEditorComponent, PropertiesGroupComponent, DynamicFormPropertyComponent ],
   exports: [ EditorComponent, DslEditorComponent, DynamicFormPropertyComponent, PropertiesGroupComponent ]
 })
