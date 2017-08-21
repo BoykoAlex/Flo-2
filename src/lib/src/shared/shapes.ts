@@ -1,4 +1,4 @@
-import { dia } from '@types/jointjs';
+import { dia } from 'jointjs';
 import { Flo } from './flo.common';
 import EditorDescriptor = Flo.ViewerDescriptor;
 import * as _ from 'lodash';

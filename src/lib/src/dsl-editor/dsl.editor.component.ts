@@ -5,11 +5,12 @@ import * as CodeMirror from 'codemirror';
 import * as _$ from 'jquery';
 const $ : any = _$;
 
-import './../../../../node_modules/codemirror/addon/lint/lint';
-import './../../../../node_modules/codemirror/addon/hint/show-hint';
-import './../../../../node_modules/codemirror/addon/display/placeholder';
-import './../../../../node_modules/codemirror/addon/scroll/annotatescrollbar';
-import './../../../../node_modules/codemirror/addon/scroll/simplescrollbars';
+import 'codemirror/addon/lint/lint';
+import 'codemirror/addon/hint/show-hint';
+import 'codemirror/addon/display/placeholder';
+import 'codemirror/addon/scroll/annotatescrollbar';
+import 'codemirror/addon/scroll/simplescrollbars';
+
 
 @Component({
   selector: 'dsl-editor',
@@ -25,7 +26,7 @@ export class DslEditorComponent implements OnInit, OnDestroy {
 
   private _lint : boolean | CodeMirror.LintOptions = false;
 
-  private _hint : any
+  private _hint : any;
 
   @Input('line-numbers')
   private lineNumbers : boolean = false;
