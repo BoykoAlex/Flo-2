@@ -58,7 +58,9 @@ return Promise.resolve()
         // The key here is library name, and the value is the the name of the global variable name
         // the window object.
         // See https://github.com/rollup/rollup/wiki/JavaScript-API#globals for more.
-        '@angular/core': 'ng.core'
+        '@angular/core': 'ng.core',
+        'jquery': '$',
+        'lodash': '_'
       },
       external: [
         // List of dependencies
@@ -78,14 +80,14 @@ return Promise.resolve()
 
     // UMD bundle.
     const umdConfig = Object.assign({}, rollupBaseConfig, {
-      entry: es5Entry,
+      input: es5Entry,
       file: path.join(distFolder, `bundles`, `${libName}.umd.js`),
       format: 'umd',
     });
 
     // Minified UMD bundle.
     const minifiedUmdConfig = Object.assign({}, rollupBaseConfig, {
-      entry: es5Entry,
+      input: es5Entry,
       file: path.join(distFolder, `bundles`, `${libName}.umd.min.js`),
       format: 'umd',
       plugins: rollupBaseConfig.plugins.concat([uglify({})])
@@ -93,14 +95,14 @@ return Promise.resolve()
 
     // ESM+ES5 flat module bundle.
     const fesm5config = Object.assign({}, rollupBaseConfig, {
-      entry: es5Entry,
+      input: es5Entry,
       file: path.join(distFolder, `${libName}.es5.js`),
       format: 'es'
     });
 
     // ESM+ES2015 flat module bundle.
     const fesm2015config = Object.assign({}, rollupBaseConfig, {
-      entry: es2015Entry,
+      input: es2015Entry,
       file: path.join(distFolder, `${libName}.js`),
       format: 'es'
     });

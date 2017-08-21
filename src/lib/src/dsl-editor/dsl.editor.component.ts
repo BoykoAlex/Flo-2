@@ -64,7 +64,7 @@ export class DslEditorComponent implements OnInit, OnDestroy {
     this._dsl = dsl;
     if (this.doc && this._dsl !== this.doc.getValue()) {
       let cursorPosition = (<any>this.doc).getCursor();
-      this.doc.setValue(this._dsl);
+      this.doc.setValue(this._dsl || '');
       (<any>this.doc).setCursor(cursorPosition);
     }
   }
@@ -88,7 +88,7 @@ export class DslEditorComponent implements OnInit, OnDestroy {
   ngOnInit() {
 
     let options : CodeMirror.EditorConfiguration = {
-      value: this._dsl,
+      value: this._dsl || '',
       gutters: ['CodeMirror-lint-markers'],
       extraKeys: {'Ctrl-Space': 'autocomplete'},
       lineNumbers: this.lineNumbers,
@@ -116,7 +116,7 @@ export class DslEditorComponent implements OnInit, OnDestroy {
     }
 
     // Turns out "value" in the option doesn't set it.
-    this.doc.setValue(this._dsl);
+    this.doc.setValue(this._dsl || '');
 
     this.doc.on('change', this.debounce ? _.debounce(this._dslChangedHandler, this.debounce) : this._dslChangedHandler);
     this.doc.on('focus', () => this.focus.emit());
