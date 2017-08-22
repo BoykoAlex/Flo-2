@@ -35,7 +35,8 @@
     "lint": "tslint ./src/**/*.ts -t verbose",
     "release": "standard-version",
 
-    "postinstall": "postinstall-build --only-as-dependency build \"npm run build\""
+    /* Required to be able to build successfully on post-install. Thus we can reference GitHub URL as NPM dependency */
+    "postinstall": "postinstall-build --only-as-dependency  \"npm run build\""
   },
   "dependencies": {
     "@angular/core": "^4.2.4",
@@ -48,7 +49,9 @@
     "jointjs": "1.0.3",
     "lodash": "3.10.1",
     "ts-disposables": "^2.2.3",
-    "postinstall-build": "^3.0.0"
+
+    /* Required to be able to build successfully on post-install */
+    "postinstall-build": "^5.0.1"
   },
   "peerDependencies": {
     "@angular/core": ">=4.0.0 <5.0.0 || >=4.0.0-beta <5.0.0",
@@ -88,8 +91,59 @@
     "typescript": "~2.3.3",
     "zone.js": "^0.8.14",
 
+    /* Required to be able to build successfully on post-install */
+    "@angular/forms": "^4.2.4",
+    "@angular/platform-browser": "^4.2.4",
+    "@types/codemirror": "0.0.45",
+    "@types/jointjs": "^1.0.4",
+    "@types/lodash": "^4.14.73",
     "codemirror": "^5.28.0",
-    "jointjs": "1.0.3"
-
-  }
+    "jointjs": "1.0.3",
+    "lodash": "3.10.1",
+    "ts-disposables": "^2.2.3"
+  },
+  /* Required to be able to build successfully on post-install */
+  "buildDependencies": [
+    "@angular/core",
+    "@angular/forms",
+    "@angular/platform-browser",
+    "@types/codemirror",
+    "@types/jointjs",
+    "@types/lodash",
+    "codemirror",
+    "jointjs",
+    "lodash",
+    "ts-disposables",
+    "@angular/common",
+    "@angular/compiler",
+    "@angular/compiler-cli",
+    "@angular/platform-browser",
+    "@angular/platform-browser-dynamic",
+    "@angular/platform-server",
+    "@types/jasmine",
+    "@types/node",
+    "camelcase",
+    "concurrently",
+    "core-js",
+    "glob",
+    "jasmine-core",
+    "karma",
+    "karma-chrome-launcher",
+    "karma-cli",
+    "karma-html-reporter",
+    "karma-jasmine",
+    "karma-jasmine-html-reporter",
+    "lite-server",
+    "ngx-bootstrap",
+    "rimraf",
+    "rollup",
+    "rollup-plugin-sourcemaps",
+    "rollup-plugin-uglify",
+    "rxjs",
+    "standard-version",
+    "systemjs",
+    "tslint",
+    "typescript",
+    "zone.js"
+  ]
 }
