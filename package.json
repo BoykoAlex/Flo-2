@@ -34,6 +34,7 @@
     "integration:aot": "cd integration && npm run e2e:aot",
     "lint": "tslint ./src/**/*.ts -t verbose",
     "release": "standard-version",
+
     "postinstall": "postinstall-build --only-as-dependency build \"npm run build\""
   },
   "dependencies": {
@@ -85,6 +86,10 @@
     "systemjs": "^0.19.40",
     "tslint": "~5.3.2",
     "typescript": "~2.3.3",
-    "zone.js": "^0.8.14"
+    "zone.js": "^0.8.14",
+
+    "codemirror": "^5.28.0",
+    "jointjs": "1.0.3"
+
   }
 }
