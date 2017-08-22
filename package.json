@@ -35,7 +35,7 @@
     "lint": "tslint ./src/**/*.ts -t verbose",
     "release": "standard-version",
 
-    "postinstall": "postinstall-build --only-as-dependency  \"npm run build\""
+    "postinstall": "postinstall-build --only-as-dependency dist \"npm run build\""
   },
   "dependencies": {
     "@angular/core": "^4.2.4",
